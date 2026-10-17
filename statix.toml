@@ -1,0 +1,4 @@
+# Statix linter configuration
+disabled = [
+  "repeated_keys"
+]
