@@ -18,6 +18,7 @@
     nautilus
     proton-pass
     pycharm
+    qview
     trash-cli
     tutanota-desktop
     udiskie

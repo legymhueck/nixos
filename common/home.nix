@@ -205,6 +205,7 @@ in
     "kitty/kitty.conf".source = ../dotfiles/kitty/.config/kitty/kitty.conf;
     "kitty/dank-tabs.conf".source = ../dotfiles/kitty/.config/kitty/dank-tabs.conf;
     "kitty/dank-theme.conf".source = ../dotfiles/kitty/.config/kitty/dank-theme.conf;
+    "doublecmd/doublecmd.xml".source = ../dotfiles/doublecmd/.config/doublecmd/doublecmd.xml;
     "mc/ini".source = ../dotfiles/mc/.config/mc/ini;
     "mc/panels.ini".source = ../dotfiles/mc/.config/mc/panels.ini;
     "user-dirs.locale".source = ../dotfiles/config/.config/user-dirs.locale;

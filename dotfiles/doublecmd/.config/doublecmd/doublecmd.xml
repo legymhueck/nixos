@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doublecmd DCVersion="1.2.9" ConfigVersion="16">
+  <Language>
+    <POFileName>doublecmd.pot</POFileName>
+  </Language>
+  <Fonts>
+    <Main>
+      <Name>JetBrainsMono Nerd Font</Name>
+      <Size>12</Size>
+      <Style>0</Style>
+      <Quality>0</Quality>
+    </Main>
+  </Fonts>
+  <Layout>
+    <ButtonBar Enabled="True">
+      <IconSize>16</IconSize>
+    </ButtonBar>
+    <MiddleBar Enabled="False">
+      <IconSize>16</IconSize>
+    </MiddleBar>
+  </Layout>
+  <FilesViews>
+    <ColumnsView>
+      <AutoSaveWidth>True</AutoSaveWidth>
+    </ColumnsView>
+  </FilesViews>
+  <Icons>
+    <Theme>dctheme</Theme>
+    <Size>24</Size>
+    <ToolSize>24</ToolSize>
+  </Icons>
+  <ColumnsSets DefaultTitleHash="540805403">
+    <ColumnsSet UseFrameCursor="False">
+      <Name>Default</Name>
+      <Unique>239E4461-8F50-4C99-B927-E734ADD1D2FF</Unique>
+      <CustomView>False</CustomView>
+      <FileSystem>&lt;General&gt;</FileSystem>
+      <PixelsPerInch>96</PixelsPerInch>
+      <Columns>
+        <Column>
+          <Title>Name</Title>
+          <Unique>9BD8887D-1271-47EC-9FC9-55C4D0F31E3E</Unique>
+          <FuncString>[DC().GETFILENAME{}]</FuncString>
+          <Width>650</Width>
+          <Align>0</Align>
+          <Font>
+            <Name>JetBrainsMono Nerd Font</Name>
+            <Size>12</Size>
+            <Style>0</Style>
+            <Quality>0</Quality>
+          </Font>
+        </Column>
+        <Column>
+          <Title>Ext</Title>
+          <Unique>CE776592-CBB1-465C-97CB-620794529DE4</Unique>
+          <FuncString>[DC().GETFILEEXT{}]</FuncString>
+          <Width>0</Width>
+          <Align>0</Align>
+          <Font>
+            <Name>JetBrainsMono Nerd Font</Name>
+            <Size>12</Size>
+            <Style>0</Style>
+            <Quality>0</Quality>
+          </Font>
+        </Column>
+        <Column>
+          <Title>Size</Title>
+          <Unique>C5D7D204-695D-45EC-B8FB-9F09783D12DF</Unique>
+          <FuncString>[DC().GETFILESIZE{}]</FuncString>
+          <Width>120</Width>
+          <Align>1</Align>
+          <Font>
+            <Name>JetBrainsMono Nerd Font</Name>
+            <Size>12</Size>
+            <Style>0</Style>
+            <Quality>0</Quality>
+          </Font>
+        </Column>
+        <Column>
+          <Title>Date</Title>
+          <Unique>B6E1B14C-3603-40E9-83E8-8AD6B0819AAF</Unique>
+          <FuncString>[DC().GETFILETIME{}]</FuncString>
+          <Width>220</Width>
+          <Align>1</Align>
+          <Font>
+            <Name>JetBrainsMono Nerd Font</Name>
+            <Size>12</Size>
+            <Style>0</Style>
+            <Quality>0</Quality>
+          </Font>
+        </Column>
+        <Column>
+          <Title>Attr</Title>
+          <Unique>DC36C102-65C4-490D-85AC-2FB96D6A8F21</Unique>
+          <FuncString>[DC().GETFILEATTR{}]</FuncString>
+          <Width>0</Width>
+          <Align>0</Align>
+          <Font>
+            <Name>JetBrainsMono Nerd Font</Name>
+            <Size>12</Size>
+            <Style>0</Style>
+            <Quality>0</Quality>
+          </Font>
+        </Column>
+      </Columns>
+    </ColumnsSet>
+  </ColumnsSets>
+</doublecmd>
