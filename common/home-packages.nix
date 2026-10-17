@@ -37,7 +37,6 @@ in
   # the GitHub CLI come from programs.* in common/home.nix.
   home.packages =
     (with pkgs; [
-      antigravity-ide
       aria2
       aspell
       aspellDicts.de
