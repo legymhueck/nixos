@@ -84,6 +84,7 @@ in
       less
       liberation_ttf
       libreoffice
+      localsend
       lsof
       meld
       micro
