@@ -219,15 +219,16 @@ in
     $DRY_RUN_CMD mkdir -p "$HOME/Projects"
   '';
 
-  # Skip the LibreOffice first-start wizard.
-  home.activation.libreofficeFirstStart = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    registry="$HOME/.config/libreoffice/4/user/registrymodifications.xcu"
-    if [ ! -e "$registry" ]; then
-      $DRY_RUN_CMD install -D -m 0644 ${../dotfiles/libreoffice/.config/libreoffice/4/user/registrymodifications.xcu} "$registry"
-    elif ! grep -q 'oor:name="FirstStartWizardCompleted"' "$registry"; then
-      $DRY_RUN_CMD sed -i \
-        's|</oor:items>| <item oor:path="/org.openoffice.Office.Common/Misc"><prop oor:name="FirstStartWizardCompleted" oor:op="fuse"><value>true</value></prop></item>\n</oor:items>|' \
-        "$registry"
-    fi
+  # Overwrite LibreOffice's mutable profile on every activation with the managed baseline.
+  home.activation.libreofficeProfile = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    profile="$HOME/.config/libreoffice/4/user"
+    source=${../dotfiles/libreoffice/.config/libreoffice/4/user}
+    $DRY_RUN_CMD install -D -m 0644 "$source/registrymodifications.xcu" "$profile/registrymodifications.xcu"
+    $DRY_RUN_CMD install -D -m 0644 \
+      "$source/config/soffice.cfg/modules/swriter/toolbar/singlemode.xml" \
+      "$profile/config/soffice.cfg/modules/swriter/toolbar/singlemode.xml"
+    $DRY_RUN_CMD install -D -m 0644 \
+      "$source/config/soffice.cfg/modules/swriter/toolbar/singlemode-text.xml" \
+      "$profile/config/soffice.cfg/modules/swriter/toolbar/singlemode-text.xml"
   '';
 }
