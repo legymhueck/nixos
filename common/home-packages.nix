@@ -120,6 +120,7 @@ in
       ripgrep
       ruff
       scrcpy
+      signal-desktop
       sshfs
       tealdeer
       tinymist
