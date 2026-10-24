@@ -112,6 +112,7 @@ in
       openconnect
       p7zip
       pandoc
+      pi-coding-agent
       proton-authenticator
       pwvucontrol
       python3
