@@ -36,6 +36,10 @@
       url = "path:./flakes/doublecmd-qt6";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    revpdf = {
+      url = "path:./flakes/revpdf";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     noctalia = {
       url = "github:noctalia-dev/noctalia";
     };

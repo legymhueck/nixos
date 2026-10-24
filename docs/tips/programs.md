@@ -6,3 +6,4 @@
 - [Cornelsen Offline Lernen](https://www.cornelsen.de/service/kundenservice/digitale-produkte/cornelsen-offline-lernen) - School books offline
 - [BiBox](https://www.bibox.schule) - Westermann school books client
 - [MTPlayer](https://www.p2tools.de/mtplayer/) - Media player for German/Austrian/Swiss public broadcasters
+- [RevPDF](https://www.revpdf.com) - Offline PDF editor

@@ -2,6 +2,7 @@
   config,
   lib,
   inputs,
+  pkgs,
   osConfig,
   ...
 }:
@@ -36,6 +37,16 @@ in
     gtk-theme = "adw-gtk3-dark";
     icon-theme = "breeze-dark";
     color-scheme = "prefer-dark";
+  };
+
+  # Noctalia resolves launcher icons from GTK's active icon theme. Keep the
+  # GTK settings.ini in sync with GSettings so the resolver sees Breeze Dark.
+  gtk = {
+    enable = true;
+    iconTheme = {
+      name = "breeze-dark";
+      package = pkgs.kdePackages.breeze-icons;
+    };
   };
 
   programs.noctalia = {

@@ -12,7 +12,7 @@ Personal, reproducible NixOS workstation configuration: one flake, two alternati
 | `nixos-mango/` | MangoWM + Noctalia (greetd autologin) |
 | `nixos-plasma/` | KDE Plasma 6 + SDDM |
 | `dotfiles/` | Files that Home Manager links (kitty, mc, scripts, starship, ...) |
-| `flakes/` | Local package flakes: `bibox`, `cornelsen_offline_lernen`, `hylki`, `mtplayer` |
+| `flakes/` | Local package flakes: `bibox`, `cornelsen_offline_lernen`, `hylki`, `mtplayer`, `revpdf` |
 | `install.sh` | Disk-wiping installer for the NixOS minimal ISO |
 | `docs/` | Install guide (Typst), Git handout, tips |
 | `.github/workflows/` | CI: lint and evaluation of both variants |

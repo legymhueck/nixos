@@ -68,6 +68,7 @@ in
       celluloid
       chatgpt
       # chatgpt-cli
+      claude-code
       cmatrix
       conjure
       dvdbackup
@@ -107,6 +108,7 @@ in
       megasync
       meld
       micro
+      mistral-rs
       mpv
       nuspell
       obsidian
@@ -140,6 +142,7 @@ in
       zip
     ])
     ++ [
+      inputs.revpdf.packages.${system}.default
       mypaint
       audacity
       veracrypt
