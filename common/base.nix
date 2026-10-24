@@ -171,6 +171,7 @@ in
     services.fwupd.enable = true;
     services.hardware.bolt.enable = true;
     services.udisks2.enable = true;
+    services.gvfs.enable = true;
     services.avahi = {
       enable = true;
       nssmdns4 = true;
