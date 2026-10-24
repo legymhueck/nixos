@@ -32,9 +32,17 @@ let
 
     nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.makeWrapper ];
 
-    # The Electron/AppImage app does not pick up the cursor from the session.
+    # The package is a plain extracted AppImage, so NIXOS_OZONE_WL is ignored
+    # and Electron would run under XWayland, where the cursor comes from the X
+    # client (not from Mango's cursor_theme). Force native Wayland (env var, so
+    # it works even if the launcher script drops arguments) and make GSettings
+    # (cursor-theme from desktop.nix) and the dconf backend visible, because
+    # Chromium asks GTK for the theme before it looks at XCURSOR_*.
     postFixup = (old.postFixup or "") + ''
       wrapProgram $out/bin/pcloud \
+        --set ELECTRON_OZONE_PLATFORM_HINT auto \
+        --prefix XDG_DATA_DIRS : ${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name} \
+        --prefix GIO_EXTRA_MODULES : ${pkgs.dconf.lib}/lib/gio/modules \
         --set XCURSOR_THEME ${sv.XCURSOR_THEME} \
         --set XCURSOR_SIZE ${sv.XCURSOR_SIZE} \
         --set XCURSOR_PATH ${lib.concatStringsSep ":" (lib.toList sv.XCURSOR_PATH)}

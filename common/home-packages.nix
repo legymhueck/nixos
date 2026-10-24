@@ -66,6 +66,8 @@ in
       btrfs-assistant
       cava
       celluloid
+      chatgpt
+      # chatgpt-cli
       cmatrix
       conjure
       dvdbackup
