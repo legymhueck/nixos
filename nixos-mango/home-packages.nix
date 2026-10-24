@@ -25,7 +25,7 @@ let
         pkgs.fetchzip {
           # Code of the release: https://www.pcloud.com/release-notes/linux.html
           url = "https://api.pcloud.com/getpubzip?code=XZtJmbJZp6YyRQOCSjbAwPVct6fTXJloyHhy&filename=pcloud-${pcloudVersion}.zip";
-          hash = lib.fakeHash; # build once, then paste the hash from the error
+          hash = "sha256-MrEuAwKsGXHwTr7garKLN0OQYkqRji/RxN/DACKcLa0=";
         }
       }/pCloud.AppImage";
     };

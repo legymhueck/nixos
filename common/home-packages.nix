@@ -112,7 +112,6 @@ in
       openconnect
       p7zip
       pandoc
-      pcloud
       proton-authenticator
       pwvucontrol
       python3
