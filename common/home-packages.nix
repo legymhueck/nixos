@@ -102,6 +102,7 @@ in
       libreoffice
       localsend
       lsof
+      megasync
       meld
       micro
       mpv
@@ -111,6 +112,7 @@ in
       openconnect
       p7zip
       pandoc
+      pcloud
       proton-authenticator
       pwvucontrol
       python3
