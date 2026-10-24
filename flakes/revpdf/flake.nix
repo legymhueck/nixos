@@ -49,7 +49,8 @@
             "$out/share/icons/hicolor/512x512/apps/revpdf.png"
 
           makeWrapper ${pkgs.appimage-run}/bin/appimage-run "$out/bin/revpdf" \
-            --add-flags "$out/share/revpdf/revpdf.AppImage"
+            --add-flags "$out/share/revpdf/revpdf.AppImage" \
+            --prefix LD_LIBRARY_PATH : ${pkgs.libepoxy}/lib
 
           runHook postInstall
         '';
