@@ -24,6 +24,7 @@
     man-pages
     mc
     nfs-utils
+    nixfmt
     ntfs3g
     openssh
     shellcheck

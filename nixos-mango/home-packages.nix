@@ -38,6 +38,8 @@ let
         --set XCURSOR_THEME ${sv.XCURSOR_THEME} \
         --set XCURSOR_SIZE ${sv.XCURSOR_SIZE} \
         --set XCURSOR_PATH ${lib.concatStringsSep ":" (lib.toList sv.XCURSOR_PATH)}
+      substituteInPlace $out/share/applications/pcloud.desktop \
+        --replace-fail 'Exec=pcloud' "Exec=$out/bin/pcloud"
     '';
   });
 in
