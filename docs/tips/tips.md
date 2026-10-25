@@ -5,13 +5,14 @@
 Follow `docs/install_guide/nixos-install-guide.typ`. After `nixos-generate-config --root /mnt`, copy the whole repository layout (the flake refers to all of it) and move the generated hardware module into the variant directory:
 
 ```sh
-scp -r flake.nix flake.lock profile common nixos-mango nixos-plasma dotfiles flakes \
+scp -r flake.nix flake.lock profile stage common nixos-mango nixos-plasma dotfiles flakes \
   root@<iso-ip>:/mnt/etc/nixos/
 # on the ISO:
 mv /mnt/etc/nixos/hardware-configuration.nix /mnt/etc/nixos/nixos-mango/
 rm /mnt/etc/nixos/configuration.nix
 rm -f /mnt/etc/nixos/nixos-plasma/hardware-configuration.nix
 echo mango > /mnt/etc/nixos/profile      # or plasma
+echo base  > /mnt/etc/nixos/stage        # or full; with base run post-install.sh after the first boot
 ```
 
 ## Change the password for m (root login is disabled)

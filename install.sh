@@ -6,6 +6,14 @@
 #   sudo ./install.sh mango  /dev/nvme0n1     # MangoWM + Noctalia
 #   sudo ./install.sh plasma /dev/nvme0n1     # KDE Plasma 6 + SDDM
 #
+# Two stages (optional third argument):
+#   base  (default) encrypted system, desktop and a small package set. Fast, nothing
+#                   large is built on the live ISO. Finish with ./post-install.sh
+#                   on the installed system.
+#   full            everything in one go (large applications, local builds).
+#
+#   sudo ./install.sh mango /dev/nvme0n1 full
+#
 # This WIPES the whole disk. You are asked once for a password. It is used for
 # the LUKS passphrase and the login of user "m" (root login is disabled).
 # Keep the two identical: the keyring and the lock screen use the same password.
@@ -16,6 +24,7 @@ exec > >(tee -a /tmp/install.log) 2>&1 # keep a log of the install run
 
 PROFILE="${1:-}"
 DISK="${2:-}"
+STAGE="${3:-base}"
 PW="${PW:-}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CFG=/mnt/etc/nixos # temporary location during the install, moved to ~/nixos at the end
@@ -39,11 +48,12 @@ cleanup() {
 trap cleanup EXIT
 
 # ---------- preflight (nothing is touched yet) ----------
-[[ $PROFILE == mango || $PROFILE == plasma ]] || die "usage: $0 <mango|plasma> <disk>   e.g. $0 mango /dev/nvme0n1"
+[[ $PROFILE == mango || $PROFILE == plasma ]] || die "usage: $0 <mango|plasma> <disk> [base|full]   e.g. $0 mango /dev/nvme0n1"
+[[ $STAGE == base || $STAGE == full ]] || die "stage must be 'base' or 'full', not '$STAGE'"
 [[ $EUID -eq 0 ]] || die "run as root (sudo -i first)"
-[[ -n $DISK && -b $DISK ]] || die "usage: $0 <mango|plasma> <disk>   e.g. $0 mango /dev/nvme0n1"
+[[ -n $DISK && -b $DISK ]] || die "usage: $0 <mango|plasma> <disk> [base|full]   e.g. $0 mango /dev/nvme0n1"
 [[ -d /sys/firmware/efi ]] || die "not booted in UEFI mode"
-for f in flake.nix flake.lock common/base.nix common/vars.nix "nixos-$PROFILE/configuration.nix" "nixos-$PROFILE/home.nix"; do
+for f in flake.nix flake.lock common/base.nix common/vars.nix common/post-install.nix post-install.sh "nixos-$PROFILE/configuration.nix" "nixos-$PROFILE/home.nix"; do
   [[ -f $REPO_ROOT/$f ]] || die "missing $REPO_ROOT/$f"
 done
 for d in dotfiles flakes; do
@@ -63,7 +73,7 @@ curl --fail --silent --show-error --head --connect-timeout 5 --max-time 10 \
 
 lsblk "$DISK"
 if [[ ${YES:-0} != 1 ]]; then
-  read -rp "Wipe ALL of $DISK and install '$HOST' ($PROFILE)? Type YES: " ans
+  read -rp "Wipe ALL of $DISK and install '$HOST' ($PROFILE, $STAGE stage)? Type YES: " ans
   [[ $ans == YES ]] || die "aborted"
 fi
 
@@ -169,6 +179,7 @@ rm -f -- "$CFG/configuration.nix"
 # ~/nixos is a working clone and nothing needs to be kept in sync by hand.
 cp -a --no-preserve=ownership "$REPO_ROOT/." "$CFG/"
 printf '%s\n' "$PROFILE" > "$CFG/profile"
+printf '%s\n' "$STAGE" > "$CFG/stage" # base: small package set; post-install.sh switches it to full
 # Only the chosen variant gets the generated hardware config; a foreign one from
 # the repo must not stay behind.
 rm -f -- "$CFG/nixos-mango/hardware-configuration.nix" "$CFG/nixos-plasma/hardware-configuration.nix"
@@ -182,7 +193,7 @@ fi
 cd "$CFG"
 [[ -d .git ]] || git init -q # a zip download has no history
 git add -A # flakes ignore untracked files
-git -c user.name="Installer" -c user.email="installer@localhost" commit -q -m "Installation: $PROFILE profile and generated hardware configuration"
+git -c user.name="Installer" -c user.email="installer@localhost" commit -q -m "Installation: $PROFILE profile, $STAGE stage and generated hardware configuration"
 
 # ---------- install ----------
 step "nixos-install (this takes a while)"
@@ -206,6 +217,15 @@ cd /
 umount -R /mnt || echo "WARNING: could not unmount /mnt cleanly (reboot is fine)" >&2
 cryptsetup close cryptroot || true
 
+if [[ $STAGE == base ]]; then
+  NEXT="Base install finished. After the first login, connect to the network and run
+the post install (large applications, local builds):
+
+  cd ~/nixos && ./post-install.sh"
+else
+  NEXT="Full install finished, there is no post install step."
+fi
+
 cat <<EOF
 
 ==> Done. Remove the USB stick and run: reboot
@@ -214,4 +234,6 @@ At boot you type the LUKS passphrase once; the desktop then starts without a
 second login prompt (Mango). The password you entered is also the password of
 $USER_NAME (root is locked; use sudo) and of the lock screen.
 Your configuration is in ~/nixos. Rebuild with: nh os switch   (alias: rebuild)
+
+$NEXT
 EOF

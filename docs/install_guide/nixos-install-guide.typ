@@ -48,6 +48,7 @@
 disk `/dev/nvme0n1`, hostname `nixbox`, user `m`, time zone, keyboard layout.
 The ISO is the current stable minimal ISO; the system tracks `nixos-unstable`
 (rolling, like Arch). Everything lives in one git-tracked flake.
+*Two parts:* the *base install* (from the ISO) builds the encrypted, bootable system with a small package set; the *post install* (on the installed system) adds the large applications and everything that is compiled locally.
 *One passphrase:* the LUKS passphrase is typed at boot, then the system logs in automatically and
 unlocks the keyring with that same passphrase. Use *the same string* as login password for `m`.
 
@@ -81,7 +82,7 @@ nmtui                       # Wi-Fi (wpa_cli if the ISO ships wpa_supplicant); w
 curl --fail --head --connect-timeout 5 https://cache.nixos.org/nix-cache-info
 ```
 
-= Recommended: use the install script
+= Recommended: base install with the install script
 
 The repository script `install.sh` replaces all the manual steps below, from partitioning through password setup. It wipes the selected disk, so use it *instead of* the manual steps, not after them. It needs a complete repository checkout and copies all of it, including `.git`, to `~/nixos`. It refuses a disk with mounted partitions, so it cannot wipe the installer stick by mistake.
 
@@ -94,7 +95,7 @@ lsblk                                   # identify the target disk
 ./install.sh mango /dev/nvme0n1         # or: ./install.sh plasma /dev/nvme0n1
 ```
 
-The script enables flakes (and the Noctalia binary cache for Mango, otherwise Noctalia is compiled locally), partitions, encrypts, formats, creates the subvolumes, installs, sets the password of `m` and moves the configuration to `~/nixos`. It uses a temporary swap file only while installing and deletes it at the end. The rest of this guide is the manual equivalent and a reference.
+The script enables flakes (and the Noctalia binary cache for Mango, otherwise Noctalia is compiled locally), partitions, encrypts, formats, creates the subvolumes, installs, sets the password of `m` and moves the configuration to `~/nixos`. It installs the *base stage* (file `stage` = `base`): the complete system, but only the small user package set from `common/home-packages.nix`. Pass `full` as third argument (`./install.sh mango /dev/nvme0n1 full`) to install everything at once and skip the post install. It uses a temporary swap file only while installing and deletes it at the end. After the reboot continue with the post install below. The rest of this guide is the manual equivalent and a reference.
 
 #note[The manual steps below show Mango. For Plasma replace `mango` with `plasma` and skip the Mango-only parts (Noctalia cache, keyring section).]
 
@@ -171,16 +172,17 @@ grep stateVersion configuration.nix     # remember this value, you need it below
 ```
 
 `hardware-configuration.nix` is the only generated file you keep; check that it lists the four subvolumes, `/boot`
-and `boot.initrd.luks.devices."cryptroot"`. Copy the root `flake.nix`, `flake.lock`, `profile`, `common/`, `nixos-mango/`, `nixos-plasma/`, `dotfiles/` and `flakes/` into `/mnt/etc/nixos`, and move the generated hardware module into the variant directory you install. Put the variant name (`mango` or `plasma`) in `/mnt/etc/nixos/profile`; the hostname alias `nixbox` builds that variant.
+and `boot.initrd.luks.devices."cryptroot"`. Copy the root `flake.nix`, `flake.lock`, `profile`, `stage`, `common/`, `nixos-mango/`, `nixos-plasma/`, `dotfiles/` and `flakes/` into `/mnt/etc/nixos`, and move the generated hardware module into the variant directory you install. Put the variant name (`mango` or `plasma`) in `/mnt/etc/nixos/profile` and the stage (`base` or `full`) in `/mnt/etc/nixos/stage`; the hostname alias `nixbox` builds that variant.
 
 ```sh
-scp -r flake.nix flake.lock profile common nixos-mango nixos-plasma dotfiles flakes \
+scp -r flake.nix flake.lock profile stage common nixos-mango nixos-plasma dotfiles flakes \
   root@<iso-ip>:/mnt/etc/nixos/
 # on the live ISO:
 mv /mnt/etc/nixos/hardware-configuration.nix /mnt/etc/nixos/nixos-mango/
 rm /mnt/etc/nixos/configuration.nix
 rm -f /mnt/etc/nixos/nixos-plasma/hardware-configuration.nix   # a foreign one from the repo
 echo mango > /mnt/etc/nixos/profile
+echo base > /mnt/etc/nixos/stage        # base: post install later; full: everything now
 ```
 
 The Nix files are listed below for reference (shared ones in `common/`, Mango ones in `nixos-mango/`). The install commands
@@ -204,6 +206,9 @@ use the repository's root flake (`flake.nix`); there are no per-configuration fl
 #file("packages.nix")
 #raw(read("../../nixos-mango/packages.nix"), lang: "nix", block: true)
 
+#file("nixos-mango/post-install.nix")
+#raw(read("../../nixos-mango/post-install.nix"), lang: "nix", block: true)
+
 #file("common/brave.nix")
 #raw(read("../../common/brave.nix"), lang: "nix", block: true)
 
@@ -221,6 +226,9 @@ use the repository's root flake (`flake.nix`); there are no per-configuration fl
 
 #file("common/home-packages.nix")
 #raw(read("../../common/home-packages.nix"), lang: "nix", block: true)
+
+#file("common/post-install.nix")
+#raw(read("../../common/post-install.nix"), lang: "nix", block: true)
 
 #file("common/packages.nix")
 #raw(read("../../common/packages.nix"), lang: "nix", block: true)
@@ -272,6 +280,19 @@ reboot                                   # remove the USB stick
 
 Boot: type the LUKS passphrase, Mango starts by itself. Noctalia starts via Mango's `exec_once`;
 `SUPER + d` opens its launcher, `SUPER + Return` a terminal, `SUPER + Shift + Return` Double Commander. Then run the keyring test above.
+
+= Post install
+
+Only needed after a base install (stage `base`). On the installed system, connected to the network, as `m` (not root):
+
+```sh
+cd ~/nixos
+./post-install.sh                       # stage -> full, then nh os switch
+```
+
+The script checks that it runs on the installed system, writes `full` to `stage`, applies the configuration with `nh os switch` and commits the change. It installs the large applications (`common/post-install.nix`, `nixos-mango/post-install.nix`), VeraCrypt and the local package flakes, so it can take a while and compile some packages. If the build fails, `stage` is set back to `base`, the running system is unchanged, and the script can be run again. Extra arguments are passed to nh: `./post-install.sh -- --max-jobs 2`. Afterwards reload Mango with `SUPER + r`.
+
+#note[Until the post install has run, Mango's `SUPER + Shift + Return` (Double Commander) and the other post-install applications do not exist. Terminal (`SUPER + Return`), Nautilus, Firefox, Brave and the launcher work from the base install.]
 
 = After the first boot
 

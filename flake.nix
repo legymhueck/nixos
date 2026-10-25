@@ -87,14 +87,26 @@
           boot.initrd.luks.devices.cryptroot.device = lib.mkDefault "/dev/null";
         };
 
+      # Install stage, read from ./stage: "base" (what install.sh installs from
+      # the ISO: encrypted system, desktop, small package set) or "full" (adds
+      # the large applications and local builds, switched on by post-install.sh).
+      # Default is "full" so a checkout without the file behaves as before.
+      fileStage =
+        if builtins.pathExists ./stage then lib.removeSuffix "\n" (builtins.readFile ./stage) else "full";
+
       mkSystem =
         {
           variant,
           evalOnly ? false,
+          stage ? fileStage,
         }:
+        assert lib.assertMsg (lib.elem stage [
+          "base"
+          "full"
+        ]) "./stage must contain 'base' or 'full', not '${stage}'";
         lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit inputs; };
+          specialArgs = { inherit inputs stage; };
           modules = [
             (./. + "/nixos-${variant}/configuration.nix")
             home-manager.nixosModules.home-manager
@@ -103,7 +115,7 @@
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 backupFileExtension = "bak";
-                extraSpecialArgs = { inherit inputs; };
+                extraSpecialArgs = { inherit inputs stage; };
                 users.${vars.user} = import (./. + "/nixos-${variant}/home.nix");
               };
             }
@@ -139,7 +151,15 @@
           # is present (the committed one belongs to the current machine).
           named "" (lib.filter hasHardware variants) { }
           # Evaluation-only twins for CI and `nix eval`; never deploy these.
-          ++ named "-eval" variants { evalOnly = true; }
+          # Both stages are always checked, independent of ./stage.
+          ++ named "-eval" variants {
+            evalOnly = true;
+            stage = "full";
+          }
+          ++ named "-base-eval" variants {
+            evalOnly = true;
+            stage = "base";
+          }
         )
         # `nixos-rebuild --flake .` / `nh os switch` look up the hostname.
         // lib.optionalAttrs (hasHardware profile) {
@@ -159,7 +179,7 @@
             cd ${self}
             statix check .
             deadnix --fail --exclude "**/hardware-configuration.nix" .
-            shellcheck install.sh dotfiles/scripts/.local/share/scripts/*.sh
+            shellcheck install.sh post-install.sh dotfiles/scripts/.local/share/scripts/*.sh
             touch $out
           '';
     };

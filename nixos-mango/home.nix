@@ -1,25 +1,18 @@
-{ config, pkgs, ... }:
+{
+  config,
+  lib,
+  stage,
+  ...
+}:
 
-let
-  tutanotaDesktopEntry = pkgs.makeDesktopItem {
-    name = "tutanota-desktop";
-    desktopName = "Tuta";
-    comment = "The desktop client for Tuta, the secure e-mail, calendar and drive service.";
-    genericName = "Mail Client";
-    categories = [ "Network" ];
-    exec = "tutanota-desktop %U";
-    icon = "tutanota-desktop";
-    mimeTypes = [ "x-scheme-handler/mailto" ];
-    startupWMClass = "Tuta";
-    terminal = false;
-  };
-in
 {
   imports = [
     ../common/home.nix
     ./desktop.nix
     ./home-packages.nix
-  ];
+  ]
+  # Large applications and local builds: only after post-install.sh (stage "full").
+  ++ lib.optionals (stage == "full") [ ./post-install.nix ];
 
   xdg.configFile."qt6ct/qt6ct.conf".text = ''
     [Appearance]
@@ -27,23 +20,6 @@ in
     custom_palette=true
     style=Fusion
   '';
-
-  xdg.dataFile."applications/tutanota-desktop.desktop".source =
-    "${tutanotaDesktopEntry}/share/applications/tutanota-desktop.desktop";
-
-  # xnviewmp does not provide a desktop entry itself.
-  xdg.desktopEntries.xnviewmp = {
-    name = "XnView MP";
-    genericName = "Image Viewer";
-    comment = "View and organize images";
-    exec = "xnviewmp %F";
-    icon = "image-x-generic";
-    categories = [
-      "Graphics"
-      "Viewer"
-    ];
-    terminal = false;
-  };
 
   xdg.mimeApps.defaultApplications = {
     "x-scheme-handler/http" = [ "firefox.desktop" ];

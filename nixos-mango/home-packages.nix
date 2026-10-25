@@ -1,10 +1,7 @@
+{ pkgs, ... }:
 {
-  pkgs,
-  inputs,
-  ...
-}:
-{
-  # Mango-only user packages (the shared set is in ../common/home-packages.nix).
+  # Mango-only base user packages (the shared set is in ../common/home-packages.nix,
+  # the large applications are in ./post-install.nix).
   home.packages = [
     (import ../common/brave.nix {
       inherit pkgs;
@@ -13,22 +10,8 @@
   ]
   ++ (with pkgs; [
     adwaita-icon-theme
-    bitwarden-desktop
-    flameshot
-    gpu-screen-recorder
-    intellij-idea
-    kdePackages.kdeconnect-kde
     nautilus
-    pcloud
-    proton-pass
-    pycharm
-    qview
     trash-cli
-    tutanota-desktop
     udiskie
-    whatsie
-  ])
-  ++ [
-    inputs.doublecmd-qt6.packages.${pkgs.stdenv.hostPlatform.system}.default
-  ];
+  ]);
 }

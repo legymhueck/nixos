@@ -21,7 +21,7 @@
         inherit system;
         config.allowUnfree = true;
       };
-      lib = pkgs.lib;
+      inherit (pkgs) lib;
 
       revpdf = pkgs.stdenvNoCC.mkDerivation {
         pname = "revpdf";

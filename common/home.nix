@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  stage,
   ...
 }:
 
@@ -18,7 +19,9 @@ in
   imports = [
     ./firefox.nix
     ./home-packages.nix
-  ];
+  ]
+  # Large applications and local builds: only after post-install.sh (stage "full").
+  ++ lib.optionals (stage == "full") [ ./post-install.nix ];
 
   # Home Manager settings shared by the Mango and Plasma variants.
 
@@ -221,7 +224,6 @@ in
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
-      "x-scheme-handler/mailto" = [ "co.hyprlab.Hylki.desktop" ];
       "x-scheme-handler/x-github-client" = [ "github-desktop.desktop" ];
       "x-scheme-handler/x-github-desktop-auth" = [ "github-desktop.desktop" ];
       "x-scheme-handler/x-github-desktop-dev-auth" = [ "github-desktop.desktop" ];
