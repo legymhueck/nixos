@@ -303,7 +303,7 @@ nh os switch                                 # alias: rebuild; picks the nixbox 
 - *Warnings "unknown experimental feature '='", "...'extra-substituters'":* the config lines were joined into one. Redo the `nix.conf` step above (`unset NIX_CONFIG` first) and check with `nix config show`.
 - *Installer freezes or the screen stops (RAM full):* look at `swapon --show` and `free -h` from a second TTY or over SSH. If needed, hard-reset, then redo `cryptsetup open`, the mounts and the temporary swap steps; or simply rerun `install.sh`; whatever was already downloaded or built stays in `/mnt/nix/store`, so the retry resumes.
 - *"path ... is not tracked by Git"* or a file seems ignored: `git add` it.
-- *Passphrase asked twice or no auto-login:* `boot.initrd.systemd.enable` must be on; check `journalctl -u greetd -b`.
+- *Passphrase asked twice or no auto-login:* systemd is now the only initrd implementation; check `journalctl -u greetd -b`.
 - *Black screen or back at the same screen:* greetd restarts the session, and tty1 has no getty. Switch to tty2 with Ctrl+Alt+F2, log in as `m`, then run `sudo systemctl stop greetd` to stop the restart loop while you inspect `journalctl -u greetd -b` or try `mango`. Run `sudo systemctl start greetd` to resume the graphical login.
 - *No bar:* run `noctalia` in a terminal and read the error. A Noctalia config error is also caught at build time.
 - *Noctalia compiles for ages:* the Cachix key is missing or the input has `follows`; check `nix.settings` above.

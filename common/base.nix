@@ -87,7 +87,6 @@ in
     };
     boot.loader.timeout = 3;
     boot.loader.efi.canTouchEfiVariables = true;
-    boot.initrd.systemd.enable = true; # needed: passes the passphrase to the session
     boot.initrd.luks.devices.cryptroot = {
       # merged with the generated entry
       allowDiscards = true; # TRIM through LUKS (leaks which blocks are free)
@@ -167,6 +166,10 @@ in
     systemd.tmpfiles.rules = [ "v /home/.snapshots 0700 root root -" ];
 
     # --- services ---
+    virtualisation.docker.rootless = {
+      enable = true;
+      setSocketVariable = true;
+    };
     services.printing.enable = true;
     services.fwupd.enable = true;
     services.hardware.bolt.enable = true;
