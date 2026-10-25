@@ -7,6 +7,30 @@
 let
   vars = import ./vars.nix;
 
+  allowedUnfreePkgs = [
+    "antigravity-ide"
+    "bitwarden-desktop"
+    "brave"
+    "chatgpt"
+    "claude-code"
+    "github-copilot-cli"
+    "intellij-idea"
+    "megasync"
+    "obsidian"
+    "opencode"
+    "pcloud"
+    "pi-coding-agent"
+    "proton-authenticator"
+    "proton-pass"
+    "pycharm"
+    "signal-desktop"
+    "tutanota-desktop"
+    "xnviewmp"
+    "veracrypt"
+    "vscode"
+    "zed-editor"
+  ];
+
   # Brave managed policies (Brave reads /etc/brave/policies/managed, NOT the
   # /etc/chromium path that programs.chromium writes).
   bravePolicies = {
@@ -56,14 +80,16 @@ in
     nix.registry.nixpkgs.flake = inputs.nixpkgs;
     nix.nixPath = [ "nixpkgs=${inputs.nixpkgs}" ];
     nix.optimise.automatic = true; # dedupe the store
-    nixpkgs.config.allowUnfree = true; # drop if you want free software only
+    # Keep the unfree allowlist explicit instead of allowing the entire
+    # package set; add a package here only when it is required and justified.
+    nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) allowedUnfreePkgs;
     # pkgs.stable: the nixos-26.05 package set (for packages broken on unstable).
     # Also visible to Home Manager because of home-manager.useGlobalPkgs.
     nixpkgs.overlays = [
       (final: _prev: {
         stable = import inputs.nixpkgs-stable {
           inherit (final.stdenv.hostPlatform) system;
-          config.allowUnfree = true;
+          config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "filen-desktop" ];
         };
       })
     ];

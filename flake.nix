@@ -179,7 +179,7 @@
             cd ${self}
             statix check .
             deadnix --fail --exclude "**/hardware-configuration.nix" .
-            shellcheck install.sh post-install.sh dotfiles/scripts/.local/share/scripts/*.sh
+            shellcheck install.sh install-heavy-apps.sh post-install.sh dotfiles/scripts/.local/share/scripts/*.sh
             touch $out
           '';
     };

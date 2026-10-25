@@ -28,7 +28,7 @@ The installation has two parts, so that nothing large is built on the live ISO (
 | Part | Where | What it does |
 | --- | --- | --- |
 | **1. Base install** | live ISO, `install.sh` | Partitions, encrypts and formats the disk, installs the complete system (services, desktop, login, Brave/Firefox policies, ...) and a small package set from the binary cache. Writes `stage` = `base`. |
-| **2. Post install** | installed system, `post-install.sh` | Switches `stage` to `full` and runs `nh os switch`: large applications (LibreOffice, GIMP, Kdenlive, IDEs, ...), VeraCrypt and the local package flakes, which are compiled or fetched here. |
+| **2. Optional heavy app install** | installed system, `./install-heavy-apps.sh` | Switches `stage` to `full` and runs `nh os switch`: large applications (LibreOffice, GIMP, Kdenlive, IDEs, ...), VeraCrypt and the local package flakes, which are compiled or fetched here. `./post-install.sh` remains as a compatibility wrapper and runs the same script. |
 
 ### 1. Base install
 
@@ -55,10 +55,12 @@ After the reboot and the first login, connect to the network and run on the inst
 
 ```sh
 cd ~/nixos
+./install-heavy-apps.sh
+# compatibility alias still works:
 ./post-install.sh
 ```
 
-It sets `stage` to `full`, applies the configuration with `nh os switch` and commits the change. It can be repeated; if the build fails, `stage` is set back to `base` and the running system stays unchanged. Extra arguments go to nh, e.g. `./post-install.sh -- --max-jobs 2`. Until it has run, Mango's `SUPER + Shift + Return` (Double Commander) and other apps listed in `common/post-install.nix` and `nixos-mango/post-install.nix` are not installed.
+It sets `stage` to `full`, applies the configuration with `nh os switch` and commits the change. It can be repeated; if the build fails, `stage` is set back to `base` and the running system stays unchanged. Extra arguments go to nh, e.g. `./install-heavy-apps.sh -- --max-jobs 2`. Until it has run, Mango's `SUPER + Shift + Return` (Double Commander) and other apps listed in `common/post-install.nix` and `nixos-mango/post-install.nix` are not installed.
 
 ## Login (Mango)
 
@@ -91,6 +93,12 @@ nh os test              # activate without a boot entry
 ```
 
 Old generations are removed weekly (`programs.nh.clean`, keeps 5 and 14 days). Check with `nix flake check` (lint) and `nix eval .#nixosConfigurations.nixbox-mango-eval.config.system.build.toplevel.drvPath` (same for `-plasma-eval`) before pushing; CI runs the same. Format with `nix fmt`.
+
+### Contributor notes
+
+- The unfree allowlist is intentionally explicit in `common/base.nix`; do not widen it to `allowUnfree = true` unless a package truly requires it.
+- Any new large app or local package should stay in the `full` stage and be grouped in `common/post-install.nix` or its variant-specific equivalent.
+- CI runs `nix fmt` and `nix flake check` and refuses a dirty checkout after formatting, so the repo is kept consistent before merge.
 
 ## Reproducibility
 
