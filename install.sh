@@ -6,13 +6,10 @@
 #   sudo ./install.sh mango  /dev/nvme0n1     # MangoWM + Noctalia
 #   sudo ./install.sh plasma /dev/nvme0n1     # KDE Plasma 6 + SDDM
 #
-# Two stages (optional third argument):
-#   base  (default) encrypted system, desktop and a small package set. Fast, nothing
-#                   large is built on the live ISO. Finish with ./post-install.sh
-#                   on the installed system.
-#   full            everything in one go (large applications, local builds).
+# Install the base system from the ISO; install applications and local/unfree
+# packages in separate steps after the first boot.
 #
-#   sudo ./install.sh mango /dev/nvme0n1 full
+#   sudo ./install.sh mango /dev/nvme0n1
 #
 # This WIPES the whole disk. You are asked once for a password. It is used for
 # the LUKS passphrase and the login of user "m" (root login is disabled).
@@ -48,12 +45,12 @@ cleanup() {
 trap cleanup EXIT
 
 # ---------- preflight (nothing is touched yet) ----------
-[[ $PROFILE == mango || $PROFILE == plasma ]] || die "usage: $0 <mango|plasma> <disk> [base|full]   e.g. $0 mango /dev/nvme0n1"
-[[ $STAGE == base || $STAGE == full ]] || die "stage must be 'base' or 'full', not '$STAGE'"
+[[ $PROFILE == mango || $PROFILE == plasma ]] || die "usage: $0 <mango|plasma> <disk>   e.g. $0 mango /dev/nvme0n1"
+[[ $STAGE == base ]] || die "install.sh only installs the base stage; install apps and built packages separately after boot"
 [[ $EUID -eq 0 ]] || die "run as root (sudo -i first)"
-[[ -n $DISK && -b $DISK ]] || die "usage: $0 <mango|plasma> <disk> [base|full]   e.g. $0 mango /dev/nvme0n1"
+[[ -n $DISK && -b $DISK ]] || die "usage: $0 <mango|plasma> <disk>   e.g. $0 mango /dev/nvme0n1"
 [[ -d /sys/firmware/efi ]] || die "not booted in UEFI mode"
-for f in flake.nix flake.lock common/base.nix common/vars.nix common/post-install.nix post-install.sh "nixos-$PROFILE/configuration.nix" "nixos-$PROFILE/home.nix"; do
+for f in flake.nix flake.lock common/base.nix common/vars.nix common/post-install.nix common/built-packages.nix post-install.sh install-built-packages.sh "nixos-$PROFILE/configuration.nix" "nixos-$PROFILE/home.nix"; do
   [[ -f $REPO_ROOT/$f ]] || die "missing $REPO_ROOT/$f"
 done
 for d in dotfiles flakes; do
@@ -179,7 +176,7 @@ rm -f -- "$CFG/configuration.nix"
 # ~/nixos is a working clone and nothing needs to be kept in sync by hand.
 cp -a --no-preserve=ownership "$REPO_ROOT/." "$CFG/"
 printf '%s\n' "$PROFILE" > "$CFG/profile"
-printf '%s\n' "$STAGE" > "$CFG/stage" # base: small package set; post-install.sh switches it to full
+printf '%s\n' "$STAGE" > "$CFG/stage" # apps and built packages are installed separately after first boot
 # Only the chosen variant gets the generated hardware config; a foreign one from
 # the repo must not stay behind.
 rm -f -- "$CFG/nixos-mango/hardware-configuration.nix" "$CFG/nixos-plasma/hardware-configuration.nix"
@@ -217,14 +214,11 @@ cd /
 umount -R /mnt || echo "WARNING: could not unmount /mnt cleanly (reboot is fine)" >&2
 cryptsetup close cryptroot || true
 
-if [[ $STAGE == base ]]; then
-  NEXT="Base install finished. After the first login, connect to the network and run
-the post install (large applications, local builds):
+NEXT="Base install finished. After the first login, connect to the network and run
+the two optional package installs in order:
 
-  cd ~/nixos && ./post-install.sh"
-else
-  NEXT="Full install finished, there is no post install step."
-fi
+  cd ~/nixos && ./install-heavy-apps.sh
+  ./install-built-packages.sh"
 
 cat <<EOF
 

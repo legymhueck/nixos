@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
-# Optional heavy-app install: run as the normal user on the INSTALLED system.
+# Optional cached-app install: run as the normal user on the INSTALLED system.
 #
 #   cd ~/nixos && ./install-heavy-apps.sh
 #
-# This adds the large application set and local builds by switching ./stage to
-# "full" and running `nh os switch`. It is the same as the old post-install
-# flow, but kept as a separate, explicit script for users who want to opt in
-# only when they need the heavier desktop toolchain.
+# This adds the large nixpkgs applications by switching ./stage to "apps".
+# Run ./install-built-packages.sh afterwards for local flakes and unfree apps.
 #
 # Extra arguments are passed to nh, e.g.:  ./install-heavy-apps.sh -- --max-jobs 2
 set -euo pipefail
@@ -28,7 +26,8 @@ curl --fail --silent --show-error --head --connect-timeout 5 --max-time 10 \
   || die "cannot reach the Nix cache over HTTPS (connect with nmtui or the desktop first)"
 
 OLD_STAGE=$(tr -d '[:space:]' < "$STAGE_FILE" 2>/dev/null || true)
-OLD_STAGE="${OLD_STAGE:-full}"
+OLD_STAGE="${OLD_STAGE:-base}"
+[[ $OLD_STAGE == base ]] || die "expected ./stage to be 'base', found '$OLD_STAGE'; apps are installed only once before built packages"
 DONE=0
 restore() {
   if [[ $DONE -ne 1 ]]; then
@@ -39,26 +38,25 @@ restore() {
 }
 trap restore EXIT
 
-# ---------- switch to the full stage ----------
-step "Switching ./stage to 'full' (was '$OLD_STAGE')"
-printf 'full\n' > "$STAGE_FILE"
+# ---------- switch to apps stage ----------
+step "Switching ./stage to 'apps' (was '$OLD_STAGE')"
+printf 'apps\n' > "$STAGE_FILE"
 git -C "$REPO_ROOT" add stage # flakes ignore untracked files
 
-step "Building and activating the full application set (this takes a while)"
+step "Building and activating the large application set (this takes a while)"
 cd "$REPO_ROOT"
 nh os switch "$@"
 DONE=1
 
 # ---------- record it ----------
 if git -C "$REPO_ROOT" diff --cached --quiet -- stage; then
-  echo "stage already committed as 'full'"
+  echo "stage already committed as 'apps'"
 else
-  git -C "$REPO_ROOT" commit -q -m "Heavy apps: stage full" -- stage || echo "NOTE: could not commit ./stage; commit it yourself." >&2
+  git -C "$REPO_ROOT" commit -q -m "Install cached apps: stage apps" -- stage || echo "NOTE: could not commit ./stage; commit it yourself." >&2
 fi
 
 cat <<'DONE_MSG'
 
-==> Heavy applications installed. The full desktop toolchain is now active.
-Reload the session (Mango: SUPER + r, or log out and in) so new desktop entries show up.
-From now on update with: nh os switch   (alias: rebuild)
+==> Cached large applications installed.
+Next run ./install-built-packages.sh for local flakes and unfree applications.
 DONE_MSG

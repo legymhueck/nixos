@@ -1,8 +1,4 @@
-{
-  pkgs,
-  inputs,
-  ...
-}:
+{ pkgs, ... }:
 
 let
   tutanotaDesktopEntry = pkgs.makeDesktopItem {
@@ -19,41 +15,18 @@ let
   };
 in
 {
-  # Mango-only post-install user packages (large applications, local builds).
-  # Imported by ./home.nix only when the stage is "full" (see post-install.sh).
-  # The shared ones are in ../common/post-install.nix.
-  home.packages =
-    (with pkgs; [
-      bitwarden-desktop
-      flameshot
-      gpu-screen-recorder
-      intellij-idea
-      kdePackages.kdeconnect-kde
-      pcloud
-      proton-pass
-      pycharm
-      qview
-      tutanota-desktop
-      whatsie
-    ])
-    ++ [
-      inputs.doublecmd-qt6.packages.${pkgs.stdenv.hostPlatform.system}.default
-    ];
+  # Mango-only applications for the optional apps stage. The unfree apps and
+  # local Double Commander flake are installed in ./built-packages.nix.
+  home.packages = with pkgs; [
+    flameshot
+    gpu-screen-recorder
+    kdePackages.kdeconnect-kde
+    qview
+    tutanota-desktop
+    whatsie
+  ];
 
   xdg.dataFile."applications/tutanota-desktop.desktop".source =
     "${tutanotaDesktopEntry}/share/applications/tutanota-desktop.desktop";
 
-  # xnviewmp (common/post-install.nix) does not provide a desktop entry itself.
-  xdg.desktopEntries.xnviewmp = {
-    name = "XnView MP";
-    genericName = "Image Viewer";
-    comment = "View and organize images";
-    exec = "xnviewmp %F";
-    icon = "image-x-generic";
-    categories = [
-      "Graphics"
-      "Viewer"
-    ];
-    terminal = false;
-  };
 }

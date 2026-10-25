@@ -20,8 +20,13 @@ in
     ./firefox.nix
     ./home-packages.nix
   ]
-  # Large applications and local builds: only after post-install.sh (stage "full").
-  ++ lib.optionals (stage == "full") [ ./post-install.nix ];
+  # Large cached applications are added by the apps stage; local flakes and
+  # post-install unfree packages are kept for the final, separate build stage.
+  ++ lib.optionals (builtins.elem stage [
+    "apps"
+    "full"
+  ]) [ ./post-install.nix ]
+  ++ lib.optionals (stage == "full") [ ./built-packages.nix ];
 
   # Home Manager settings shared by the Mango and Plasma variants.
 

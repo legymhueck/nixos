@@ -11,8 +11,12 @@
     ./desktop.nix
     ./home-packages.nix
   ]
-  # Large applications and local builds: only after post-install.sh (stage "full").
-  ++ lib.optionals (stage == "full") [ ./post-install.nix ];
+  # Keep locally built and unfree packages separate from the cached apps stage.
+  ++ lib.optionals (builtins.elem stage [
+    "apps"
+    "full"
+  ]) [ ./post-install.nix ]
+  ++ lib.optionals (stage == "full") [ ./built-packages.nix ];
 
   xdg.configFile."qt6ct/qt6ct.conf".text = ''
     [Appearance]

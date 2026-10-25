@@ -1,6 +1,6 @@
 # NixOS
 
-Personal, reproducible NixOS workstation configuration: one flake, two alternative desktops, Home Manager, shared dotfiles, local package flakes and a two-step installer (base install from the ISO, post install on the installed system).
+Personal, reproducible NixOS workstation configuration: one flake, two alternative desktops, Home Manager, shared dotfiles, local package flakes and an installer that separates the base system, large cached applications, and local/unfree packages.
 
 ## Layout
 
@@ -8,14 +8,15 @@ Personal, reproducible NixOS workstation configuration: one flake, two alternati
 | --- | --- |
 | `flake.nix`, `flake.lock` | Single entry point, all inputs pinned. `nixosConfigurations.nixbox` is an alias for the variant named in `profile`. A real `nixbox-<variant>` exists only where `nixos-<variant>/hardware-configuration.nix` exists; `nixbox-<variant>-eval` twins evaluate without it (CI only, never deploy) |
 | `profile` | `mango` or `plasma`: which variant `nixbox` builds (written by the installer) |
-| `stage` | `base` or `full`: whether the post-install modules are part of the build (written by `install.sh` / `post-install.sh`, default `full`) |
-| `common/` | Shared by both variants: `vars.nix` (user and host name), `base.nix` (system), `hardware-intel-laptop.nix` (Intel/ThinkPad specifics), `packages.nix`, `home.nix` (shell, git, starship, ...), `home-packages.nix` (small base set), `post-install.nix` (large applications, local builds), `firefox.nix`, `brave.nix` |
-| `nixos-mango/` | MangoWM + Noctalia (greetd autologin); `post-install.nix` holds the Mango-only large applications |
+| `stage` | `base`, `apps` or `full`: package layer currently active (written by the install scripts, default `full`) |
+| `common/` | Shared by both variants: `vars.nix` (user and host name), `base.nix` (system), `hardware-intel-laptop.nix` (Intel/ThinkPad specifics), `packages.nix`, `home.nix` (shell, git, starship, ...), `home-packages.nix` (small base set), `post-install.nix` (large nixpkgs applications), `built-packages.nix` (local flakes, customized builds, unfree apps), `firefox.nix`, `brave.nix` |
+| `nixos-mango/` | MangoWM + Noctalia (greetd autologin); `post-install.nix` holds large applications and `built-packages.nix` holds local/unfree ones |
 | `nixos-plasma/` | KDE Plasma 6 + SDDM |
 | `dotfiles/` | Files that Home Manager links (kitty, mc, scripts, starship, ...) |
 | `flakes/` | Local package flakes: `bibox`, `cornelsen_offline_lernen`, `hylki`, `mtplayer`, `revpdf` |
 | `install.sh` | Base install: disk-wiping installer for the NixOS minimal ISO |
-| `post-install.sh` | Post install: run on the installed system, adds the large applications |
+| `install-heavy-apps.sh` | First post-install step: adds large applications from nixpkgs and caches |
+| `install-built-packages.sh` | Second post-install step: adds local flakes, customized builds and optional unfree apps |
 | `docs/` | Install guide (Typst), Git handout, tips |
 | `.github/workflows/` | CI: lint and evaluation of both variants |
 
@@ -23,12 +24,13 @@ Both variants use host name `nixbox` and user `m`. They are alternatives, not tw
 
 ## Install
 
-The installation has two parts, so that nothing large is built on the live ISO (it keeps its build directories in RAM):
+The install is split into three stages so the local and unfree package set is activated separately from the large nixpkgs applications:
 
 | Part | Where | What it does |
 | --- | --- | --- |
-| **1. Base install** | live ISO, `install.sh` | Partitions, encrypts and formats the disk, installs the complete system (services, desktop, login, Brave/Firefox policies, ...) and a small package set from the binary cache. Writes `stage` = `base`. |
-| **2. Optional heavy app install** | installed system, `./install-heavy-apps.sh` | Switches `stage` to `full` and runs `nh os switch`: large applications (LibreOffice, GIMP, Kdenlive, IDEs, ...), VeraCrypt and the local package flakes, which are compiled or fetched here. `./post-install.sh` remains as a compatibility wrapper and runs the same script. |
+| **1. Base install** | live ISO, `install.sh` | Installs the complete bootable system and small desktop package set. Writes `stage` = `base`. |
+| **2. Large applications** | installed system, `./install-heavy-apps.sh` | Switches `stage` to `apps` and activates the large nixpkgs applications from their normal binary caches. `./post-install.sh` remains a compatibility alias for this step. |
+| **3. Local and unfree packages** | installed system, `./install-built-packages.sh` | Switches `stage` to `full` and activates the local flakes, customized builds and optional unfree applications. |
 
 ### 1. Base install
 
@@ -47,7 +49,7 @@ The script copies the complete checkout (with `.git`) to `~/nixos`, so it is a w
 
 The script asks for **one password**. It becomes the LUKS passphrase and the password of `m`. Root login is disabled (use `sudo`).
 
-A third argument selects the stage: `sudo ./install.sh mango /dev/nvme0n1 full` installs everything in one go (the old behaviour) and there is no post install.
+`install.sh` always installs only the base stage; packages from steps 2 and 3 are intentionally installed after first boot.
 
 ### 2. Post install
 
@@ -56,11 +58,11 @@ After the reboot and the first login, connect to the network and run on the inst
 ```sh
 cd ~/nixos
 ./install-heavy-apps.sh
-# compatibility alias still works:
-./post-install.sh
+# or use ./post-install.sh as an alias for that first step
+./install-built-packages.sh
 ```
 
-It sets `stage` to `full`, applies the configuration with `nh os switch` and commits the change. It can be repeated; if the build fails, `stage` is set back to `base` and the running system stays unchanged. Extra arguments go to nh, e.g. `./install-heavy-apps.sh -- --max-jobs 2`. Until it has run, Mango's `SUPER + Shift + Return` (Double Commander) and other apps listed in `common/post-install.nix` and `nixos-mango/post-install.nix` are not installed.
+Run the scripts in order. The first applies the large nixpkgs application set and changes `stage` to `apps`; the second installs local flakes and unfree apps and changes `stage` to `full`. Each script reverts the stage on failure, so the active system remains unchanged and you can retry. Extra arguments go to nh, e.g. `./install-heavy-apps.sh -- --max-jobs 2`. Until the final step, local flakes and optional unfree apps (including Mango's Double Commander) are not installed.
 
 ## Login (Mango)
 
@@ -84,7 +86,7 @@ Afterwards move `~/.local/share/keyrings` aside and log in again once, so a new 
 
 ## Daily use
 
-After the post install the stage is `full` for good; these commands apply and update everything.
+After both post-install steps the stage is `full`; these commands apply and update everything.
 
 ```sh
 nh os switch            # alias: rebuild. Apply the configuration

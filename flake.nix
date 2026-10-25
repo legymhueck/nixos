@@ -87,10 +87,8 @@
           boot.initrd.luks.devices.cryptroot.device = lib.mkDefault "/dev/null";
         };
 
-      # Install stage, read from ./stage: "base" (what install.sh installs from
-      # the ISO: encrypted system, desktop, small package set) or "full" (adds
-      # the large applications and local builds, switched on by post-install.sh).
-      # Default is "full" so a checkout without the file behaves as before.
+      # Install stage: base, cached large apps, then local/unfree packages.
+      # The committed stage and the default remain "full" for normal rebuilds.
       fileStage =
         if builtins.pathExists ./stage then lib.removeSuffix "\n" (builtins.readFile ./stage) else "full";
 
@@ -102,8 +100,9 @@
         }:
         assert lib.assertMsg (lib.elem stage [
           "base"
+          "apps"
           "full"
-        ]) "./stage must contain 'base' or 'full', not '${stage}'";
+        ]) "./stage must contain 'base', 'apps', or 'full', not '${stage}'";
         lib.nixosSystem {
           inherit system;
           specialArgs = { inherit inputs stage; };
@@ -151,10 +150,14 @@
           # is present (the committed one belongs to the current machine).
           named "" (lib.filter hasHardware variants) { }
           # Evaluation-only twins for CI and `nix eval`; never deploy these.
-          # Both stages are always checked, independent of ./stage.
+          # All install stages are checked, independent of ./stage.
           ++ named "-eval" variants {
             evalOnly = true;
             stage = "full";
+          }
+          ++ named "-apps-eval" variants {
+            evalOnly = true;
+            stage = "apps";
           }
           ++ named "-base-eval" variants {
             evalOnly = true;
@@ -179,7 +182,7 @@
             cd ${self}
             statix check .
             deadnix --fail --exclude "**/hardware-configuration.nix" .
-            shellcheck install.sh install-heavy-apps.sh post-install.sh dotfiles/scripts/.local/share/scripts/*.sh
+            shellcheck install.sh install-heavy-apps.sh install-built-packages.sh post-install.sh dotfiles/scripts/.local/share/scripts/*.sh
             touch $out
           '';
     };
