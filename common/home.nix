@@ -220,7 +220,12 @@ in
 
   xdg.mimeApps = {
     enable = true;
-    defaultApplications."x-scheme-handler/mailto" = [ "co.hyprlab.Hylki.desktop" ];
+    defaultApplications = {
+      "x-scheme-handler/mailto" = [ "co.hyprlab.Hylki.desktop" ];
+      "x-scheme-handler/x-github-client" = [ "github-desktop.desktop" ];
+      "x-scheme-handler/x-github-desktop-auth" = [ "github-desktop.desktop" ];
+      "x-scheme-handler/x-github-desktop-dev-auth" = [ "github-desktop.desktop" ];
+    };
   };
 
   home.activation.createProjectsDirectory = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
