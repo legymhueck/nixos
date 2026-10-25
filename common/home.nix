@@ -201,6 +201,7 @@ in
     enable = true;
     settings = {
       main.font = "JetBrains Mono NL:size=13";
+      main.include = "~/.config/foot/themes/noctalia";
       scrollback.lines = 10000;
     };
   };

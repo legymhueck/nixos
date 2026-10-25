@@ -55,8 +55,7 @@ in
     settings = {
       theme = {
         mode = "dark";
-        source = "builtin";
-        builtin = "Catppuccin";
+        source = "wallpaper";
       };
 
       wallpaper = {
@@ -171,12 +170,16 @@ in
       shell.settings_show_advanced = true;
       # Let Noctalia generate the GTK/Qt theme files (gtk3, gtk4, qt)
       # so the build produces its theme artifacts without external pins.
-      theme.templates.builtin_ids = [
-        "gtk3"
-        "gtk4"
-        "kcolorscheme"
-        "qt"
-      ];
+      theme.templates = {
+        enable_builtin_templates = true;
+        builtin_ids = [
+          "foot"
+          "gtk3"
+          "gtk4"
+          "kcolorscheme"
+          "qt"
+        ];
+      };
       widget.Spacer = {
         length = 10;
         type = "spacer";
