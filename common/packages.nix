@@ -27,6 +27,7 @@
     nixfmt
     ntfs3g
     openssh
+    rclone
     shellcheck
     shfmt
     smartmontools
