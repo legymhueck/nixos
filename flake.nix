@@ -3,11 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-26.05";
-    # Pinned on purpose: HandBrake is taken from this revision instead of
-    # nixos-unstable (see common/home-packages.nix). Review every few months;
-    # drop this input and use pkgs.handbrake once unstable is fine again.
-    nixpkgs-handbrake.url = "github:NixOS/nixpkgs/00c33702baa387c313bcfa919ef1c9565ec45c20";
     home-manager = {
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -16,39 +11,24 @@
       url = "github:mangowm/mango";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    hylki = {
-      url = "path:./flakes/hylki";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    bibox = {
-      url = "path:./flakes/bibox";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    cornelsen_offline_lernen = {
-      url = "path:./flakes/cornelsen_offline_lernen";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    mtplayer = {
-      url = "path:./flakes/mtplayer";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    doublecmd-qt6 = {
-      url = "path:./flakes/doublecmd-qt6";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    revpdf = {
-      url = "path:./flakes/revpdf";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    noctalia = {
-      url = "github:noctalia-dev/noctalia";
-    };
+    # No nixpkgs.follows: the Noctalia Cachix cache only matches its own pin.
+    noctalia.url = "github:noctalia-dev/noctalia";
     noctalia_official_plugins = {
       url = "github:noctalia-dev/official-plugins";
       flake = false;
     };
     noctalia_community_plugins = {
       url = "github:noctalia-dev/community-plugins";
+      flake = false;
+    };
+
+    # Sources of local packages in ./pkgs. Update with: nix flake update hylki-src
+    hylki-src = {
+      url = "github:hyprlab/hylki";
+      flake = false;
+    };
+    revpdf-release = {
+      url = "github:Pawandeep-prog/revpdf-release/dd72f556be18d7a87b301a82ee33397aeb2ced32";
       flake = false;
     };
   };
@@ -58,13 +38,13 @@
       self,
       nixpkgs,
       home-manager,
-      mango,
       ...
     }@inputs:
     let
       inherit (nixpkgs) lib;
       vars = import ./common/vars.nix;
       system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
       variants = [
         "mango"
         "plasma"
@@ -73,24 +53,29 @@
       hardwareFile = variant: ./. + "/nixos-${variant}/hardware-configuration.nix";
       hasHardware = variant: builtins.pathExists (hardwareFile variant);
 
-      # Only for the `-eval` outputs: lets a checkout without the generated
-      # hardware module evaluate (CI, `nix flake check`). It is never part of
-      # the real configurations, so a missing hardware module there fails
-      # loudly instead of producing an unbootable system.
-      evaluationHardware =
-        { lib, ... }:
-        {
-          fileSystems = lib.genAttrs [ "/" "/home" "/nix" "/var/log" ] (_: {
-            device = lib.mkDefault "/dev/null";
-            fsType = lib.mkDefault "btrfs";
-          });
-          boot.initrd.luks.devices.cryptroot.device = lib.mkDefault "/dev/null";
-        };
+      # Only for the `-eval` outputs: stands in for the generated hardware
+      # module so a checkout without it evaluates (CI, `nix flake check`). It is
+      # never part of the real configurations, so a missing hardware module
+      # there fails loudly instead of producing an unbootable system.
+      evaluationHardware = {
+        fileSystems = lib.genAttrs vars.btrfsMounts (_: {
+          device = "/dev/null";
+          fsType = "btrfs";
+        });
+        boot.initrd.luks.devices.cryptroot.device = "/dev/null";
+      };
 
-      # Install stage: base, cached large apps, then local/unfree packages.
-      # The committed stage and the default remain "full" for normal rebuilds.
-      fileStage =
-        if builtins.pathExists ./stage then lib.removeSuffix "\n" (builtins.readFile ./stage) else "full";
+      readFileOr =
+        file: default: if builtins.pathExists file then lib.trim (builtins.readFile file) else default;
+
+      # Install stage (base, apps, full; written by the install scripts). The
+      # committed stage and the default remain "full" for normal rebuilds.
+      # Checked by the nixbox.stage option type.
+      fileStage = readFileOr ./stage "full";
+
+      # Which variant the hostname alias (`nh os switch`) builds. The installer
+      # writes the chosen variant to ./profile; default is mango.
+      profile = readFileOr ./profile "mango";
 
       mkSystem =
         {
@@ -98,40 +83,28 @@
           evalOnly ? false,
           stage ? fileStage,
         }:
-        assert lib.assertMsg (lib.elem stage [
-          "base"
-          "apps"
-          "full"
-        ]) "./stage must contain 'base', 'apps', or 'full', not '${stage}'";
         lib.nixosSystem {
           inherit system;
-          specialArgs = { inherit inputs stage; };
+          specialArgs = { inherit inputs vars; };
           modules = [
             (./. + "/nixos-${variant}/configuration.nix")
+            (if evalOnly then evaluationHardware else hardwareFile variant)
+            { nixbox.stage = stage; }
             home-manager.nixosModules.home-manager
             {
               home-manager = {
                 useGlobalPkgs = true;
                 useUserPackages = true;
                 backupFileExtension = "bak";
-                extraSpecialArgs = { inherit inputs stage; };
-                users.${vars.user} = import (./. + "/nixos-${variant}/home.nix");
+                extraSpecialArgs = { inherit inputs vars; };
+                users.${vars.user} = ./. + "/nixos-${variant}/home.nix";
               };
             }
-          ]
-          ++ lib.optional (variant == "mango") mango.nixosModules.mango
-          ++ lib.optional evalOnly evaluationHardware;
+          ];
         };
 
-      # Which variant `nixos-rebuild --flake .` (hostname nixbox) builds. The
-      # installer writes the chosen variant to ./profile; default is mango.
-      profile =
-        if builtins.pathExists ./profile then
-          lib.removeSuffix "\n" (builtins.readFile ./profile)
-        else
-          "mango";
-
-      pkgs = nixpkgs.legacyPackages.${system};
+      # Names of the local packages from ./pkgs (the overlay is not evaluated).
+      localPackages = builtins.attrNames (import ./pkgs { inherit inputs; } { } { });
     in
     {
       formatter.${system} = pkgs.nixfmt-tree;
@@ -169,6 +142,25 @@
           ${vars.host} = self.nixosConfigurations."${vars.host}-${profile}";
         };
 
+      # Local packages built with the system's package set (overlays, unfree
+      # allowlist), e.g. `nix build .#hylki`.
+      packages.${system} =
+        let
+          systemPkgs = self.nixosConfigurations."${vars.host}-mango-eval".pkgs;
+        in
+        lib.genAttrs localPackages (name: systemPkgs.${name});
+
+      # Tools for working on this repository: `nix develop`.
+      devShells.${system}.default = pkgs.mkShellNoCC {
+        packages = with pkgs; [
+          deadnix
+          nixfmt
+          shellcheck
+          shfmt
+          statix
+        ];
+      };
+
       checks.${system}.lint =
         pkgs.runCommandLocal "lint"
           {
@@ -182,7 +174,7 @@
             cd ${self}
             statix check .
             deadnix --fail --exclude "**/hardware-configuration.nix" .
-            shellcheck install.sh install-heavy-apps.sh install-built-packages.sh post-install.sh dotfiles/scripts/.local/share/scripts/*.sh
+            shellcheck install.sh install-stage.sh scripts/*.sh pkgs/*/*.sh
             touch $out
           '';
     };

@@ -1,53 +1,5 @@
 {
   "nodes": {
-    "bibox": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./flakes/bibox",
-        "type": "path"
-      },
-      "original": {
-        "path": "./flakes/bibox",
-        "type": "path"
-      },
-      "parent": []
-    },
-    "cornelsen_offline_lernen": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./flakes/cornelsen_offline_lernen",
-        "type": "path"
-      },
-      "original": {
-        "path": "./flakes/cornelsen_offline_lernen",
-        "type": "path"
-      },
-      "parent": []
-    },
-    "doublecmd-qt6": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./flakes/doublecmd-qt6",
-        "type": "path"
-      },
-      "original": {
-        "path": "./flakes/doublecmd-qt6",
-        "type": "path"
-      },
-      "parent": []
-    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -108,23 +60,6 @@
         "type": "github"
       }
     },
-    "hylki": {
-      "inputs": {
-        "hylki-src": "hylki-src",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./flakes/hylki",
-        "type": "path"
-      },
-      "original": {
-        "path": "./flakes/hylki",
-        "type": "path"
-      },
-      "parent": []
-    },
     "hylki-src": {
       "flake": false,
       "locked": {
@@ -163,22 +98,6 @@
         "type": "github"
       }
     },
-    "mtplayer": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "path": "./flakes/mtplayer",
-        "type": "path"
-      },
-      "original": {
-        "path": "./flakes/mtplayer",
-        "type": "path"
-      },
-      "parent": []
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1792773339,
@@ -195,22 +114,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-handbrake": {
-      "locked": {
-        "lastModified": 1783862909,
-        "narHash": "sha256-eUMGcLcT4qk0lMexokWJjKJbw+wwrNQ6y46TArgN89Y=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "00c33702baa387c313bcfa919ef1c9565ec45c20",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "00c33702baa387c313bcfa919ef1c9565ec45c20",
-        "type": "github"
-      }
-    },
     "nixpkgs-lib": {
       "locked": {
         "lastModified": 1782614948,
@@ -223,22 +126,6 @@
       "original": {
         "owner": "nix-community",
         "repo": "nixpkgs.lib",
-        "type": "github"
-      }
-    },
-    "nixpkgs-stable": {
-      "locked": {
-        "lastModified": 1792898606,
-        "narHash": "sha256-Mg3rRjsbMqhSMxop5PYMXos8SwAjejrxSgVThTvP9eg=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "1f607aa79b6356ed45d3cd3c8079c196e79efa2c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-26.05",
-        "repo": "nixpkgs",
         "type": "github"
       }
     },
@@ -305,23 +192,6 @@
         "type": "github"
       }
     },
-    "revpdf": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "revpdf-release": "revpdf-release"
-      },
-      "locked": {
-        "path": "./flakes/revpdf",
-        "type": "path"
-      },
-      "original": {
-        "path": "./flakes/revpdf",
-        "type": "path"
-      },
-      "parent": []
-    },
     "revpdf-release": {
       "flake": false,
       "locked": {
@@ -341,20 +211,14 @@
     },
     "root": {
       "inputs": {
-        "bibox": "bibox",
-        "cornelsen_offline_lernen": "cornelsen_offline_lernen",
-        "doublecmd-qt6": "doublecmd-qt6",
         "home-manager": "home-manager",
-        "hylki": "hylki",
+        "hylki-src": "hylki-src",
         "mango": "mango",
-        "mtplayer": "mtplayer",
         "nixpkgs": "nixpkgs",
-        "nixpkgs-handbrake": "nixpkgs-handbrake",
-        "nixpkgs-stable": "nixpkgs-stable",
         "noctalia": "noctalia",
         "noctalia_community_plugins": "noctalia_community_plugins",
         "noctalia_official_plugins": "noctalia_official_plugins",
-        "revpdf": "revpdf"
+        "revpdf-release": "revpdf-release"
       }
     },
     "scenefx": {

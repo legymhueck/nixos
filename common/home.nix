@@ -1,32 +1,18 @@
 {
-  config,
   lib,
-  stage,
+  vars,
   ...
 }:
 
-let
-  vars = import ./vars.nix;
-  scriptDir = ../dotfiles/scripts/.local/share/scripts;
-  userScripts = [
-    "delete_snapper_snapshots.sh"
-    "format-and-mount.sh"
-    "nfs-mount.sh"
-    "ssh-permissions.sh"
-  ];
-in
 {
   imports = [
     ./firefox.nix
     ./home-packages.nix
-  ]
-  # Large cached applications are added by the apps stage; local flakes and
-  # post-install unfree packages are kept for the final, separate build stage.
-  ++ lib.optionals (builtins.elem stage [
-    "apps"
-    "full"
-  ]) [ ./post-install.nix ]
-  ++ lib.optionals (stage == "full") [ ./built-packages.nix ];
+    ./scripts.nix
+    # Active only from their install stage on (osConfig.nixbox.stage).
+    ./apps.nix
+    ./built.nix
+  ];
 
   # Home Manager settings shared by the Mango and Plasma variants.
 
@@ -36,25 +22,14 @@ in
 
   fonts.fontconfig.enable = true;
 
+  # The defaults are ~/Desktop, ~/Documents, ..., ~/Projects.
   xdg.userDirs = {
     enable = true;
     createDirectories = true;
-    desktop = "${config.home.homeDirectory}/Desktop";
-    download = "${config.home.homeDirectory}/Downloads";
-    templates = "${config.home.homeDirectory}/Templates";
-    publicShare = "${config.home.homeDirectory}/Public";
-    documents = "${config.home.homeDirectory}/Documents";
-    music = "${config.home.homeDirectory}/Music";
-    pictures = "${config.home.homeDirectory}/Pictures";
-    videos = "${config.home.homeDirectory}/Videos";
-    extraConfig.XDG_PROJECTS_DIR = "$HOME/Projects";
   };
 
   # --- shell ---
-  home.sessionPath = [
-    "$HOME/.local/bin"
-    "$HOME/.local/share/scripts"
-  ];
+  home.sessionPath = [ "$HOME/.local/bin" ];
   home.sessionVariables = {
     EDITOR = "micro";
     CLAUDE_CODE_MAX_OUTPUT_TOKENS = "64000";
@@ -98,9 +73,6 @@ in
 
       # Helpers
       create-ssh-key = "ssh-keygen -t ed25519";
-      ssh-permissions = "ssh-permissions.sh";
-      nfs-mount = "nfs-mount.sh";
-      snapper-delete = "delete_snapper_snapshots.sh";
     };
     initExtra = ''
       # Cursor shape
@@ -207,16 +179,6 @@ in
   };
 
   # --- files ---
-  home.file = lib.listToAttrs (
-    map (name: {
-      name = ".local/share/scripts/${name}";
-      value = {
-        source = scriptDir + "/${name}";
-        executable = true;
-      };
-    }) userScripts
-  );
-
   xdg.configFile = {
     "kitty/kitty.conf".source = ../dotfiles/kitty/.config/kitty/kitty.conf;
     "kitty/dank-tabs.conf".source = ../dotfiles/kitty/.config/kitty/dank-tabs.conf;
@@ -236,19 +198,15 @@ in
     };
   };
 
-  home.activation.createProjectsDirectory = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    $DRY_RUN_CMD mkdir -p "$HOME/Projects"
-  '';
-
   # Overwrite LibreOffice's mutable profile on every activation with the managed baseline.
   home.activation.libreofficeProfile = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     profile="$HOME/.config/libreoffice/4/user"
     source=${../dotfiles/libreoffice/.config/libreoffice/4/user}
-    $DRY_RUN_CMD install -D -m 0644 "$source/registrymodifications.xcu" "$profile/registrymodifications.xcu"
-    $DRY_RUN_CMD install -D -m 0644 \
+    run install -D -m 0644 "$source/registrymodifications.xcu" "$profile/registrymodifications.xcu"
+    run install -D -m 0644 \
       "$source/config/soffice.cfg/modules/swriter/toolbar/singlemode.xml" \
       "$profile/config/soffice.cfg/modules/swriter/toolbar/singlemode.xml"
-    $DRY_RUN_CMD install -D -m 0644 \
+    run install -D -m 0644 \
       "$source/config/soffice.cfg/modules/swriter/toolbar/singlemode-text.xml" \
       "$profile/config/soffice.cfg/modules/swriter/toolbar/singlemode-text.xml"
   '';

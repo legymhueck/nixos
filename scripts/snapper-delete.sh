@@ -5,7 +5,7 @@ yes_all=false
 dry_run=false
 
 usage() {
-    echo "Usage: $0 [-y|--yes] [-n|--dry-run]"
+    echo "Usage: $(basename "$0") [-y|--yes] [-n|--dry-run]"
     echo "  -y, --yes      Delete snapshots without confirmation"
     echo "  -n, --dry-run  Only print what would be deleted"
     echo "  -h, --help     Show this help"

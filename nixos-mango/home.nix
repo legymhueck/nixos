@@ -1,22 +1,14 @@
-{
-  config,
-  lib,
-  stage,
-  ...
-}:
+{ config, ... }:
 
 {
   imports = [
     ../common/home.nix
     ./desktop.nix
     ./home-packages.nix
-  ]
-  # Keep locally built and unfree packages separate from the cached apps stage.
-  ++ lib.optionals (builtins.elem stage [
-    "apps"
-    "full"
-  ]) [ ./post-install.nix ]
-  ++ lib.optionals (stage == "full") [ ./built-packages.nix ];
+    # Active only from their install stage on (osConfig.nixbox.stage).
+    ./apps.nix
+    ./built.nix
+  ];
 
   xdg.configFile."qt6ct/qt6ct.conf".text = ''
     [Appearance]

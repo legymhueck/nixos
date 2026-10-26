@@ -50,10 +50,10 @@ trap cleanup EXIT
 [[ $EUID -eq 0 ]] || die "run as root (sudo -i first)"
 [[ -n $DISK && -b $DISK ]] || die "usage: $0 <mango|plasma> <disk>   e.g. $0 mango /dev/nvme0n1"
 [[ -d /sys/firmware/efi ]] || die "not booted in UEFI mode"
-for f in flake.nix flake.lock common/base.nix common/vars.nix common/post-install.nix common/built-packages.nix post-install.sh install-built-packages.sh "nixos-$PROFILE/configuration.nix" "nixos-$PROFILE/home.nix"; do
+for f in flake.nix flake.lock common/base.nix common/vars.nix common/apps.nix common/built.nix install-stage.sh "nixos-$PROFILE/configuration.nix" "nixos-$PROFILE/home.nix"; do
   [[ -f $REPO_ROOT/$f ]] || die "missing $REPO_ROOT/$f"
 done
-for d in dotfiles flakes; do
+for d in dotfiles pkgs scripts; do
   [[ -d $REPO_ROOT/$d ]] || die "missing $REPO_ROOT/$d (referenced by the flake, the build would fail)"
 done
 # Host and user come from common/vars.nix, the single source for all modules.
@@ -182,8 +182,8 @@ printf '%s\n' "$STAGE" > "$CFG/stage" # apps and built packages are installed se
 rm -f -- "$CFG/nixos-mango/hardware-configuration.nix" "$CFG/nixos-plasma/hardware-configuration.nix"
 mv "$HW_TMP" "$CFG/nixos-$PROFILE/hardware-configuration.nix"
 
-if ! grep -q "stateVersion = \"$GEN_SV\"" "$CFG/nixos-$PROFILE/configuration.nix"; then
-  echo "WARNING: generated stateVersion is $GEN_SV but nixos-$PROFILE/configuration.nix sets something else." >&2
+if ! grep -q "stateVersion = \"$GEN_SV\"" "$CFG/common/base.nix"; then
+  echo "WARNING: generated stateVersion is $GEN_SV but common/base.nix sets something else." >&2
   echo "         (home.nix has its own home.stateVersion.) Edit it if you want them equal." >&2
 fi
 
@@ -217,8 +217,8 @@ cryptsetup close cryptroot || true
 NEXT="Base install finished. After the first login, connect to the network and run
 the two optional package installs in order:
 
-  cd ~/nixos && ./install-heavy-apps.sh
-  ./install-built-packages.sh"
+  cd ~/nixos && ./install-stage.sh apps
+  ./install-stage.sh full"
 
 cat <<EOF
 

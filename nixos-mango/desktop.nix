@@ -8,9 +8,9 @@
 }:
 
 let
-  # Defined once in configuration.nix (environment.sessionVariables)
-  cursorTheme = osConfig.environment.sessionVariables.XCURSOR_THEME;
-  cursorSize = lib.toInt osConfig.environment.sessionVariables.XCURSOR_SIZE;
+  # Defined once in configuration.nix (nixbox.cursor)
+  cursorTheme = osConfig.nixbox.cursor.theme;
+  cursorSize = osConfig.nixbox.cursor.size;
 in
 
 # Mango (compositor) + Noctalia (shell) + theming. Home Manager module.
@@ -41,11 +41,17 @@ in
 
   # Noctalia resolves launcher icons from GTK's active icon theme. Keep the
   # GTK settings.ini in sync with GSettings so the resolver sees Breeze Dark.
+  # The cursor is needed there too: GTK reads GSettings only on Wayland, so
+  # X11 clients on XWayland (pCloud's Electron) take it from settings.ini.
   gtk = {
     enable = true;
     iconTheme = {
       name = "breeze-dark";
       package = pkgs.kdePackages.breeze-icons;
+    };
+    cursorTheme = {
+      name = cursorTheme;
+      size = cursorSize;
     };
   };
 

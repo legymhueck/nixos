@@ -1,52 +1,44 @@
 # Repository Guide for Agents
 
-## Purpose and layout
+Two alternative NixOS desktops (Mango + Noctalia, KDE Plasma 6) for one laptop (host `nixbox`, user `m`): one root flake, shared `common/`, variant dirs `nixos-mango/` and `nixos-plasma/`, local packages in `pkgs/`, scripts in `scripts/`, installer `install.sh` + `install-stage.sh`. README.md has the full layout.
 
-Two alternative NixOS configurations (Mango + Noctalia, KDE Plasma 6) that share `common/`, one root flake, shared dotfiles, four local package flakes and a single installer.
+## How it fits together
 
-- `flake.nix` / `flake.lock`: only flake and only lock file (the local package flakes have their own locks). `nixosConfigurations.nixbox` is an alias for `nixbox-<profile>`, where `profile` is read from the file `profile` (default `mango`). Real `nixbox-<variant>` configurations exist only if `nixos-<variant>/hardware-configuration.nix` exists; `nixbox-<variant>-eval` (full stage) and `nixbox-<variant>-base-eval` (base stage) twins use a `/dev/null` filesystem fallback (`evaluationHardware`) and are for CI/`nix eval` only. `checks.x86_64-linux.lint` runs statix, deadnix and shellcheck (`install.sh`, `post-install.sh`, the dotfile scripts).
-- `common/vars.nix`: user and host name, read by the flake, the modules and `install.sh`. `common/hardware-intel-laptop.nix`: Intel/ThinkPad specifics (`nixbox.batteryThresholds` option, fprintd, thermald, iHD/QSV, SOF firmware), imported by each variant's `configuration.nix`.
-- `common/base.nix`: shared system module (nix settings, nh, boot, LUKS, Btrfs, zram, locale, snapper, services, Brave policies, `pkgs.stable` overlay). `common/packages.nix`: system packages (imported by `base.nix`). `common/home.nix`: Home Manager (bash, starship, zoxide, eza, git, gh, foot, scripts, mc/kitty files); it imports `common/home-packages.nix` (small base set), `common/firefox.nix` and, in the full stage, `common/post-install.nix` (large applications, patched packages, VeraCrypt wrapper, local package flakes). `common/brave.nix`: function building Brave with a password store.
-- `nixos-mango/`: `configuration.nix` (imports `common/base.nix`, the hardware module + `packages.nix`; greetd autologin at boot only, tuigreet afterwards; keyring PAM), `home.nix` (imports `common/home.nix`, `desktop.nix`, `home-packages.nix`, and `post-install.nix` in the full stage), generated `hardware-configuration.nix`.
-- `nixos-plasma/`: `configuration.nix`, `home.nix`, `home-packages.nix`.
-- `dotfiles/`: sources linked by Home Manager. Nix files use paths relative to the module, so keep them in sync with layout changes.
-- `install.sh`: the base installer (`./install.sh <mango|plasma> <disk> [base|full]`, default `base`). `post-install.sh`: run by the user on the installed system, sets `stage` to `full` and runs `nh os switch`.
-- `stage` (file, `base` or `full`, default `full` when missing): read by the flake and passed as the `stage` argument to the NixOS modules (`specialArgs`) and Home Manager (`extraSpecialArgs`). `common/home.nix` and `nixos-mango/home.nix` import `common/post-install.nix` / `nixos-mango/post-install.nix` only when `stage == "full"`.
-- `docs/install_guide/nixos-install-guide.typ` reads files from the repo (`../../...`); compile from the repo root.
+- `nixosConfigurations.nixbox` = `nixbox-<file ./profile>`. A real `nixbox-<variant>` exists only if `nixos-<variant>/hardware-configuration.nix` exists (the flake adds it; the one committed under `nixos-mango/` belongs to this machine). The `-eval`, `-apps-eval`, `-base-eval` twins use a `/dev/null` stand-in: for checks only, never deploy.
+- Module arguments `inputs` and `vars` (`common/vars.nix`) come from `specialArgs`/`extraSpecialArgs`; never `import` vars.nix in modules.
+- Install stages: the file `./stage` (`base`/`apps`/`full`, committed as `full`) sets the option `nixbox.stage`. The system level is complete in every stage; only Home Manager packages are split. `home-packages.nix` = small, cached, needed for a usable desktop (never move Firefox, Brave, Nautilus, qt6ct, kitty/foot out of it). `apps.nix` = large cached nixpkgs apps (`stage != "base"`). `built.nix` = everything compiled locally or unfree: `pkgs/`, wrappers, unfree apps (`stage == "full"`). Stage modules are always imported and wrap their `config` in `lib.mkIf`.
+- One `pkgs` everywhere (`useGlobalPkgs`); overlays live in `common/base.nix`. No package is pinned to another nixpkgs revision; add a pin only if unstable is broken and uncached, and remove it once it is cached.
 
-## Configuration invariants
+## Invariants
 
-- The generated `hardware-configuration.nix` belongs to the target installation. The one committed under `nixos-mango/` belongs to the current machine. Without it the real configuration fails to evaluate on purpose (no silent `/dev/null` root); use the `-eval` outputs for checks. Never deploy without the generated module.
-- `system.stateVersion` and `home.stateVersion` are `26.05`. Do not change them in routine updates.
-- The root flake intentionally does not set `inputs.noctalia.inputs.nixpkgs.follows` (needed for the Noctalia Cachix cache).
-- `console.earlySetup = true` keeps the German keymap at the LUKS prompt. `GTK_THEME` / `SAL_USE_VCLPLUGIN` are Mango-only (set in `nixos-mango/configuration.nix`).
-- No persistent swap file. zram only; `install.sh` uses a temporary swap file during `nixos-install` and removes it.
-- Root login is disabled in `common/base.nix`; the installer sets only the password of `m`.
-- Mango login: LUKS passphrase = password of the user. greetd `initial_session` autologs in at boot only; `default_session` is tuigreet so a crashed or logged-out session never lands unlocked. `pam_fde_boot_pw` passes the passphrase to gnome-keyring. Do not set an empty user password.
-- `programs.nh` replaces `nix.gc`; do not enable both. nh looks for the flake in `/home/m/nixos`.
-- Cursor theme/size are defined once in `nixos-mango/configuration.nix` and read back in `desktop.nix` via `osConfig`.
-- Brave policies go to `/etc/brave/policies/managed/brave.json` (not `programs.chromium`).
-- `install.sh` copies the whole checkout (with `.git`) to the target, writes `profile`, `stage` and the generated hardware module, and commits. No copy list to maintain.
-- Base vs post install: the system level (NixOS modules, services, system packages) is always complete in the base install. Only Home Manager packages are split: `home-packages.nix` files = small, cached, needed for a usable desktop; `post-install.nix` files = large applications and anything built locally (VeraCrypt, package flakes, `overrideAttrs`). Do not move something that the desktop config launches or depends on (Firefox, Brave, Nautilus, qt6ct, kitty/foot) into a post-install module. The `stage` file committed in the repo stays `full`.
+- `system.stateVersion` (in `common/base.nix`) and `home.stateVersion` stay `26.05`.
+- No `inputs.noctalia.inputs.nixpkgs.follows` (the Noctalia Cachix cache needs its own pin).
+- Unfree packages only via the explicit allowlist in `common/base.nix` (names as `lib.getName` returns them).
+- Mango login: LUKS passphrase = user password. greetd autologin (`initial_session`) at boot only, tuigreet afterwards; `pam_fde_boot_pw` unlocks gnome-keyring. Never set an empty password; root stays locked.
+- zram only, no swap file. `programs.nh` cleans; never also enable `nix.gc`.
+- Cursor: set once as `nixbox.cursor` in `nixos-mango/configuration.nix`; `desktop.nix` reads it via `osConfig` for dconf, Mango and `gtk.cursorTheme` (XWayland apps such as pCloud read the cursor only from GTK's settings.ini).
+- Brave policies go to `/etc/brave/policies/managed/brave.json`, not `programs.chromium`.
+- `install.sh` copies the whole checkout and commits with `git add -A` (`.gitignore` covers `result*`).
 
 ## Workflows
 
 ```sh
-nix eval .#nixosConfigurations.nixbox-mango-eval.config.system.build.toplevel.drvPath
-nix eval .#nixosConfigurations.nixbox-plasma-eval.config.system.build.toplevel.drvPath
-nix eval .#nixosConfigurations.nixbox-mango-base-eval.config.system.build.toplevel.drvPath   # base stage, same for plasma
-nix flake check                   # lint: statix, deadnix, shellcheck
-nix fmt                           # nixfmt on all Nix files
-typst compile docs/install_guide/nixos-install-guide.typ --root .
-nh os switch      # on the installed system
+nix flake check   # statix, deadnix, shellcheck + evaluation of all outputs
+nix eval .#nixosConfigurations.nixbox-mango-eval.config.system.build.toplevel.drvPath   # also plasma, -apps-eval, -base-eval
+nix eval .#nixosConfigurations.nixbox-mango.config.system.build.toplevel.drvPath        # the real system
+nix build .#<pkg> # a local package from pkgs/
+nix fmt           # nixfmt; CI fails on unformatted files
+typst compile docs/install_guide/nixos-install-guide.typ --root .   # then delete the PDF
 ```
 
-Flakes only see git-tracked files: `git add` new files before evaluating.
+Flakes only see git-tracked files: `git add` new files before evaluating. Users rebuild with `nh os switch`.
 
-## Notes for changes
+## Making changes
 
-- Put shared things in `common/`; keep a variant directory for what is truly desktop-specific.
-- When adding a Home Manager module or renaming a file, update the `imports` (`common/base.nix` / `common/home.nix` for shared modules, the variant files for the rest) and the Typst listings.
-- Local package flakes declare `x86_64-linux`; `hylki` also `aarch64-linux`. MTPlayer uses Temurin 21; keep it aligned with its `buildInputs`.
-- Follow the active Firefox module API in `common/firefox.nix` (`profiles.default.settings` plus `policies`).
-- Prefer wrapping a finished package (`symlinkJoin`) over `overrideAttrs`, which forces a local rebuild.
+- Shared things go in `common/`; a variant dir only holds what is desktop-specific.
+- New or renamed module: update the `imports`, the file checks in `install.sh`, and the `#raw(read(...))` listings in the Typst guide.
+- New local package: `pkgs/<name>/package.nix` (`callPackage` style, `meta.platforms`), a line in `pkgs/default.nix`, use it in a `built.nix`, add it to the allowlist if unfree. Non-fetch sources become root flake inputs.
+- New script: `scripts/<name>.sh` plus a `mkScript` line with its runtime dependencies in `common/scripts.nix`.
+- New user-facing command, alias or script: add it to `docs/tips/commands.md`.
+- Prefer wrapping a finished package (`symlinkJoin`) over `overrideAttrs`, which forces a local build.
+- Firefox: `profiles.default.settings` plus `policies` in `common/firefox.nix`.

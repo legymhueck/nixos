@@ -48,7 +48,7 @@
 disk `/dev/nvme0n1`, hostname `nixbox`, user `m`, time zone, keyboard layout.
 The ISO is the current stable minimal ISO; the system tracks `nixos-unstable`
 (rolling, like Arch). Everything lives in one git-tracked flake.
-*Three stages:* the *base install* (from the ISO) builds the encrypted, bootable system with a small package set; two optional post-install steps add the large nixpkgs applications, then local flakes, customized builds, and optional unfree apps.
+*Three stages:* the *base install* (from the ISO) builds the encrypted, bootable system with a small package set; two optional post-install steps add the large nixpkgs applications, then local packages, customized builds, and optional unfree apps.
 *One passphrase:* the LUKS passphrase is typed at boot, then the system logs in automatically and
 unlocks the keyring with that same passphrase. Use *the same string* as login password for `m`.
 
@@ -168,14 +168,14 @@ free -h
 ```sh
 nixos-generate-config --root /mnt
 cd /mnt/etc/nixos
-grep stateVersion configuration.nix     # remember this value, you need it below
+grep stateVersion configuration.nix     # must match system.stateVersion in common/base.nix
 ```
 
 `hardware-configuration.nix` is the only generated file you keep; check that it lists the four subvolumes, `/boot`
-and `boot.initrd.luks.devices."cryptroot"`. Copy the root `flake.nix`, `flake.lock`, `profile`, `stage`, `common/`, `nixos-mango/`, `nixos-plasma/`, `dotfiles/` and `flakes/` into `/mnt/etc/nixos`, and move the generated hardware module into the variant directory you install. Put the variant name (`mango` or `plasma`) in `/mnt/etc/nixos/profile` and the stage (`base`, `apps`, or `full`) in `/mnt/etc/nixos/stage`; the hostname alias `nixbox` builds that variant.
+and `boot.initrd.luks.devices."cryptroot"`. Copy the root `flake.nix`, `flake.lock`, `profile`, `stage`, `common/`, `nixos-mango/`, `nixos-plasma/`, `dotfiles/`, `pkgs/` and `scripts/` into `/mnt/etc/nixos`, and move the generated hardware module into the variant directory you install. Put the variant name (`mango` or `plasma`) in `/mnt/etc/nixos/profile` and the stage (`base`, `apps`, or `full`) in `/mnt/etc/nixos/stage`; the hostname alias `nixbox` builds that variant.
 
 ```sh
-scp -r flake.nix flake.lock profile stage common nixos-mango nixos-plasma dotfiles flakes \
+scp -r flake.nix flake.lock profile stage common nixos-mango nixos-plasma dotfiles pkgs scripts \
   root@<iso-ip>:/mnt/etc/nixos/
 # on the live ISO:
 mv /mnt/etc/nixos/hardware-configuration.nix /mnt/etc/nixos/nixos-mango/
@@ -206,11 +206,14 @@ use the repository's root flake (`flake.nix`); there are no per-configuration fl
 #file("packages.nix")
 #raw(read("../../nixos-mango/packages.nix"), lang: "nix", block: true)
 
-#file("nixos-mango/post-install.nix")
-#raw(read("../../nixos-mango/post-install.nix"), lang: "nix", block: true)
+#file("nixos-mango/cursor.nix")
+#raw(read("../../nixos-mango/cursor.nix"), lang: "nix", block: true)
 
-#file("nixos-mango/built-packages.nix")
-#raw(read("../../nixos-mango/built-packages.nix"), lang: "nix", block: true)
+#file("nixos-mango/apps.nix")
+#raw(read("../../nixos-mango/apps.nix"), lang: "nix", block: true)
+
+#file("nixos-mango/built.nix")
+#raw(read("../../nixos-mango/built.nix"), lang: "nix", block: true)
 
 #file("common/brave.nix")
 #raw(read("../../common/brave.nix"), lang: "nix", block: true)
@@ -221,6 +224,9 @@ use the repository's root flake (`flake.nix`); there are no per-configuration fl
 #file("common/vars.nix")
 #raw(read("../../common/vars.nix"), lang: "nix", block: true)
 
+#file("common/options.nix")
+#raw(read("../../common/options.nix"), lang: "nix", block: true)
+
 #file("common/hardware-intel-laptop.nix")
 #raw(read("../../common/hardware-intel-laptop.nix"), lang: "nix", block: true)
 
@@ -230,11 +236,14 @@ use the repository's root flake (`flake.nix`); there are no per-configuration fl
 #file("common/home-packages.nix")
 #raw(read("../../common/home-packages.nix"), lang: "nix", block: true)
 
-#file("common/post-install.nix")
-#raw(read("../../common/post-install.nix"), lang: "nix", block: true)
+#file("common/apps.nix")
+#raw(read("../../common/apps.nix"), lang: "nix", block: true)
 
-#file("common/built-packages.nix")
-#raw(read("../../common/built-packages.nix"), lang: "nix", block: true)
+#file("common/built.nix")
+#raw(read("../../common/built.nix"), lang: "nix", block: true)
+
+#file("common/scripts.nix")
+#raw(read("../../common/scripts.nix"), lang: "nix", block: true)
 
 #file("common/packages.nix")
 #raw(read("../../common/packages.nix"), lang: "nix", block: true)
@@ -293,13 +302,13 @@ After a base install (stage `base`), run these two steps in order on the install
 
 ```sh
 cd ~/nixos
-./install-heavy-apps.sh                 # stage -> apps
-./install-built-packages.sh             # stage -> full
+./install-stage.sh apps                 # stage -> apps
+./install-stage.sh full                 # stage -> full
 ```
 
-The first script installs the large nixpkgs applications and changes `stage` to `apps`; the second installs local flakes, customized builds, and optional unfree apps, then changes `stage` to `full`. `./post-install.sh` remains an alias for the first step. If a step fails, its stage is restored and the running system remains unchanged, so retry the failed script. Extra arguments are passed to nh, for example `./install-heavy-apps.sh -- --max-jobs 2`. Afterwards reload Mango with `SUPER + r`.
+`apps` installs the large nixpkgs applications and changes `stage` to `apps`; `full` installs local packages, customized builds, and optional unfree apps, then changes `stage` to `full`. If a step fails, its stage is restored and the running system remains unchanged, so retry the failed step. Extra arguments are passed to nh, for example `./install-stage.sh apps -- --max-jobs 2`. Afterwards reload Mango with `SUPER + r`.
 
-#note[Until the built-packages step, Mango's `SUPER + Shift + Return` (Double Commander), local flakes, and optional unfree apps are not installed. Terminal (`SUPER + Return`), Nautilus, Firefox, Brave and the launcher work from the base install.]
+#note[Until the `full` step, Mango's `SUPER + Shift + Return` (Double Commander), local packages, and optional unfree apps are not installed. Terminal (`SUPER + Return`), Nautilus, Firefox, Brave and the launcher work from the base install.]
 
 = After the first boot
 

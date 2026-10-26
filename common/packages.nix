@@ -1,7 +1,8 @@
 { pkgs, ... }:
 
 {
-  # System-wide tools shared by both desktop variants.
+  # System-wide tools shared by both desktop variants. Linters and formatters
+  # for this repository are in the dev shell (`nix develop`).
   environment.systemPackages = with pkgs; [
     acpi
     alsa-utils
@@ -13,7 +14,6 @@
     btrfs-progs
     compsize
     ddcutil
-    deadnix
     dosfstools
     exfatprogs
     ffmpeg
@@ -24,14 +24,10 @@
     man-pages
     mc
     nfs-utils
-    nixfmt
     ntfs3g
     openssh
     rclone
-    shellcheck
-    shfmt
     smartmontools
-    statix
     tpm2-tools
     traceroute
     usbutils

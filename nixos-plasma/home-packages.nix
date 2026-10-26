@@ -11,7 +11,7 @@
   ++ (with pkgs; [
     kdePackages.dolphin
     kdePackages.dolphin-plugins
-    kdePackages.kio-extras
     kdePackages.kdenetwork-filesharing
+    kdePackages.kio-extras
   ]);
 }
