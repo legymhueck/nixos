@@ -12,4 +12,5 @@ commands and aliases).
 | `nfs-mount` | Mount NAS NFS shares |
 | `snapper-delete` | Delete snapper snapshots interactively |
 | `ssh-permissions` | Reset permissions in `~/.ssh` (700/600/644) |
+| `update-check` | Show which flake inputs have newer upstream commits (read-only) |
 | `to-webm` | Shrink recordings into browser-playable WebM (AV1) or, with `--mp4`, H.264 MP4 |

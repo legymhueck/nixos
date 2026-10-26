@@ -27,5 +27,10 @@ in
     ])
     (mkScript "ssh-permissions" [ findutils ])
     (mkScript "to-webm" [ ffmpeg ])
+    (mkScript "update-check" [
+      curl
+      git
+      jq
+    ])
   ];
 }

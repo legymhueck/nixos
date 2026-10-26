@@ -30,6 +30,21 @@ nh clean all --keep 5          # remove old generations now (also runs weekly)
 nix flake check                # lint and evaluate (in ~/nixos)
 ```
 
+### Is an update worth it?
+
+```sh
+update-check                   # which inputs have newer commits (changes nothing)
+nh os build --update           # in ~/nixos: build the update, list changed packages, don't switch
+rebuild                        # then apply it ...
+git checkout flake.lock        # ... or throw the update away
+```
+
+`nixpkgs` is the input that matters: only when it has moved do you get new
+package versions and fixes (it advances every few days, see
+https://status.nixos.org, channel nixos-unstable). After an update that
+works, commit the lock file: `git commit -am "flake.lock: update inputs"`
+(see `commit-messages.md`).
+
 ## Drives and network
 
 ```sh
