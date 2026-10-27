@@ -34,6 +34,7 @@ let
     "vscode"
     "vscode-extension-anthropic-claude-code"
     "vscode-extension-MS-python-vscode-pylance"
+    "yEd"
     "vscode-extension-oracle-oracle-java"
     "zed-editor"
   ];
@@ -235,6 +236,10 @@ in
     environment.sessionVariables = {
       NIXOS_OZONE_WL = "1"; # Electron/Chromium on Wayland
     };
+    # Link the hyphenation dictionaries from home.packages (hyphenDicts.*) into
+    # the per-user profile so LibreOffice finds hyph_*.dic via XDG_DATA_DIRS
+    # (/share/hunspell is linked by default, /share/hyphen is not).
+    environment.pathsToLink = [ "/share/hyphen" ];
     fonts.packages = with pkgs; [
       carlito
       fira-code

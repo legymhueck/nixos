@@ -21,9 +21,11 @@
       celluloid
       cmatrix
       conjure
+      duckdb
       dvdbackup
       filen-desktop
       gimp
+      greenfoot
       gst_all_1.gst-libav
       gst_all_1.gst-plugins-bad
       gst_all_1.gst-plugins-good
@@ -48,6 +50,7 @@
       nuspell
       openconnect
       pandoc
+      plantuml
       python3
       rnote
       ruff
@@ -57,6 +60,7 @@
       uv
       vlc
       vorta
+      yed
       yt-dlp
     ];
   };
