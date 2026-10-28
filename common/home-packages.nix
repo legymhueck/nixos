@@ -20,7 +20,9 @@
     lsof
     micro
     mpv
+    mupdf
     p7zip
+    poppler-utils
     pwvucontrol
     qt6Packages.qt6ct
     ripgrep
@@ -28,6 +30,9 @@
     tealdeer
     unzip
     wget
+    python314Packages.pillow
+    python314Packages.pymupdf
+    python314Packages.pdftotext
     wl-clipboard
     zip
   ];

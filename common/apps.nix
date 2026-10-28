@@ -48,6 +48,7 @@
       meld
       mistral-rs
       nuspell
+      onlyoffice-desktopeditors
       openconnect
       pandoc
       plantuml

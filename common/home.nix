@@ -195,6 +195,15 @@
       "x-scheme-handler/x-github-client" = [ "github-desktop.desktop" ];
       "x-scheme-handler/x-github-desktop-auth" = [ "github-desktop.desktop" ];
       "x-scheme-handler/x-github-desktop-dev-auth" = [ "github-desktop.desktop" ];
+
+      # LibreOffice Writer documents (desktop file name from nixpkgs is writer.desktop)
+      "application/msword" = [ "writer.desktop" ];
+      "application/vnd.ms-word.document.macroEnabled.12" = [ "writer.desktop" ];
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document" = [ "writer.desktop" ];
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.template" = [ "writer.desktop" ];
+      "application/vnd.oasis.opendocument.text" = [ "writer.desktop" ];
+      "application/vnd.oasis.opendocument.text-template" = [ "writer.desktop" ];
+      "application/rtf" = [ "writer.desktop" ];
     };
   };
 
