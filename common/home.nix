@@ -204,6 +204,15 @@
       "application/vnd.oasis.opendocument.text" = [ "writer.desktop" ];
       "application/vnd.oasis.opendocument.text-template" = [ "writer.desktop" ];
       "application/rtf" = [ "writer.desktop" ];
+
+      # LibreOffice Impress presentations (desktop file name from nixpkgs is impress.desktop)
+      "application/vnd.ms-powerpoint" = [ "impress.desktop" ];
+      "application/vnd.ms-powerpoint.presentation.macroEnabled.12" = [ "impress.desktop" ];
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation" = [ "impress.desktop" ];
+      "application/vnd.openxmlformats-officedocument.presentationml.slideshow" = [ "impress.desktop" ];
+      "application/vnd.openxmlformats-officedocument.presentationml.template" = [ "impress.desktop" ];
+      "application/vnd.oasis.opendocument.presentation" = [ "impress.desktop" ];
+      "application/vnd.oasis.opendocument.presentation-template" = [ "impress.desktop" ];
     };
   };
 
