@@ -30,9 +30,6 @@
     tealdeer
     unzip
     wget
-    python314Packages.pillow
-    python314Packages.pymupdf
-    python314Packages.pdftotext
     wl-clipboard
     zip
   ];

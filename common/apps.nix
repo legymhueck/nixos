@@ -52,7 +52,14 @@
       openconnect
       pandoc
       plantuml
-      python3
+      (python3.withPackages (
+        ps: with ps; [
+          duckdb
+          pillow
+          pymupdf
+          pdftotext
+        ]
+      ))
       rnote
       ruff
       scrcpy
