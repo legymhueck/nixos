@@ -39,7 +39,9 @@
       hyphenDicts.en_GB
       hyphenDicts.en_US
       iperf3
-      jdk
+      # Java 21 with JavaFX built in, like Liberica JDK Full on the school PCs
+      # (cached on cache.nixos.org, no local build).
+      (jdk21.override { enableJavaFX = true; })
       khal
       kdePackages.kdenlive
       kdePackages.partitionmanager
