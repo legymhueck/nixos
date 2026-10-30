@@ -13,7 +13,7 @@ Personal, reproducible NixOS workstation configuration: one flake, two alternati
 | `nixos-mango/` | MangoWM + Noctalia (greetd autologin); `cursor.nix` (`nixbox.cursor`), `desktop.nix`, and its own `apps.nix` / `built.nix` |
 | `nixos-plasma/` | KDE Plasma 6 + SDDM |
 | `dotfiles/` | Files that Home Manager links (kitty, mc, starship, LibreOffice, ...) |
-| `pkgs/` | Local packages (`bibox`, `cornelsen-offline-lernen`, `doublecmd-qt6`, `hylki`, `mtplayer`, `revpdf`), added to `pkgs` by an overlay |
+| `pkgs/` | Local packages (`bibox`, `cornelsen-offline-lernen`, `doublecmd-qt6`, `flaci`, `hylki`, `mtplayer`, `revpdf`), added to `pkgs` by an overlay |
 | `scripts/` | Shell scripts, installed as commands by `common/scripts.nix` |
 | `install.sh` | Base install: disk-wiping installer for the NixOS minimal ISO |
 | `install-stage.sh` | Post-install steps: `apps` (large applications from nixpkgs), then `full` (local packages, customized builds, optional unfree apps) |

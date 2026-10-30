@@ -42,6 +42,7 @@ in
         chatgpt
         claude-code
         cornelsen-offline-lernen
+        flaci # local package (fork with current Electron and desktop entry), see ../pkgs/flaci
         github-copilot-cli
         hylki
         megasync
