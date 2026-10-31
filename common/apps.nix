@@ -24,6 +24,7 @@
       duckdb
       dvdbackup
       filen-desktop
+      filius
       gimp
       greenfoot
       gst_all_1.gst-libav
