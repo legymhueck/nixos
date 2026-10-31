@@ -6,6 +6,7 @@
   environment.systemPackages = with pkgs; [
     acpi
     alsa-utils
+    android-tools
     asciidoc
     asciidoctor
     bash-completion
