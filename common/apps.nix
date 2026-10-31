@@ -47,8 +47,9 @@
       kdePackages.kdenlive
       kdePackages.partitionmanager
       libreoffice
+      lite-xl
       localsend
-      logseq
+      logisim-evolution
       meld
       mistral-rs
       nuspell
