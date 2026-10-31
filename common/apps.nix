@@ -48,6 +48,7 @@
       kdePackages.partitionmanager
       libreoffice
       localsend
+      logseq
       meld
       mistral-rs
       nuspell

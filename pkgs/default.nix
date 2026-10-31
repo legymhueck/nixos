@@ -9,6 +9,9 @@ final: _prev: {
   # Replaces nixpkgs' flaci (older, no desktop entry), see the package.
   flaci = final.callPackage ./flaci/package.nix { };
   hylki = final.callPackage ./hylki/package.nix { src = inputs.hylki-src; };
+  # Logseq: nixpkgs pins it to Electron 39, which is EOL and now refused by Nix;
+  # use the first non-EOL Electron (42) instead.
+  logseq = _prev.logseq.override { electron_39 = final.electron_42; };
   mtplayer = final.callPackage ./mtplayer/package.nix { };
   revpdf = final.callPackage ./revpdf/package.nix { inherit (inputs) revpdf-release; };
 }
