@@ -26,6 +26,7 @@
       audacity
       blanket
       btrfs-assistant
+      cargo
       cava
       celluloid
       cmatrix
@@ -38,6 +39,7 @@
       filen-desktop
       filius
       gimp
+      gcc
       greenfoot
       gst_all_1.gst-libav
       gst_all_1.gst-plugins-bad
@@ -78,6 +80,7 @@
       ))
       rnote
       ruff
+      rustc
       scrcpy
       tinymist
       typst
