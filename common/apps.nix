@@ -53,6 +53,13 @@
       hyphenDicts.de_DE
       hyphenDicts.en_GB
       hyphenDicts.en_US
+      # Keep the Conjure image editor above; ImageMagick ships an unrelated
+      # `conjure` executable with the same path.
+      (symlinkJoin {
+        name = "imagemagick-without-conjure";
+        paths = [ imagemagick ];
+        postBuild = "rm $out/bin/conjure";
+      })
       iperf3
       # Java 21 with JavaFX built in, like Liberica JDK Full on the school PCs
       # (cached on cache.nixos.org, no local build).
@@ -60,6 +67,7 @@
       khal
       kdePackages.kdenlive
       kdePackages.partitionmanager
+      libavif
       libreoffice
       lite-xl
       localsend
