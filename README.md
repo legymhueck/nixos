@@ -17,7 +17,7 @@ Personal, reproducible NixOS workstation configuration: one flake, two alternati
 | `scripts/` | Shell scripts, installed as commands by `common/scripts.nix` |
 | `install.sh` | Base install: disk-wiping installer for the NixOS minimal ISO |
 | `install-stage.sh` | Post-install steps: `apps` (large applications from nixpkgs), then `full` (local packages, customized builds, optional unfree apps) |
-| `docs/` | Install guide (Typst), Git handout, tips; `docs/tips/commands.md` is a cheat sheet of everyday commands |
+| `docs/` | Install guide (Typst), Git handout, tips; `docs/tips/commands.md` is a cheat sheet of everyday commands; `docs/setup/` holds setup guides for hardware and services (printer, ...) |
 | `.github/workflows/` | CI: lint and evaluation of both variants |
 
 Both variants use host name `nixbox` and user `m`. They are alternatives, not two hosts.
@@ -113,4 +113,5 @@ Old generations are removed weekly (`programs.nh.clean`, keeps 5 and 14 days). C
 - `nixos-mango/hardware-configuration.nix` in the repo belongs to the current machine; the installer replaces it for a new one. Never deploy without the generated module of the target.
 - The `stage` file in the repo is `full`; only the installer writes `base` into the copy on the target machine.
 - Do not change `system.stateVersion` / `home.stateVersion` during routine updates.
+- Setting up hardware and services (printer, ...): `docs/setup/`.
 - More detail: `docs/install_guide/nixos-install-guide.typ` (compile with `typst compile docs/install_guide/nixos-install-guide.typ --root .`), `AGENTS.md`.

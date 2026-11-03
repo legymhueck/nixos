@@ -72,6 +72,15 @@ ssh-permissions                # fix permissions in ~/.ssh
 fingerprint                    # enroll a fingerprint (fprintd)
 ```
 
+## Printing
+
+```sh
+system-config-printer          # printer settings GUI (Mango; Plasma: System Settings > Printers)
+lpstat -p -d                   # printers and the default one
+lp file.pdf                    # print a file on the default printer (Kyocera FS-3820N, see docs/setup/printer.md)
+lp -o sides=two-sided-long-edge file.pdf   # duplex (needs the duplex unit)
+```
+
 ## Everyday helpers
 
 ```sh

@@ -77,6 +77,9 @@
   systemd.services."getty@tty1".enable = false;
   systemd.services."autovt@tty1".enable = false;
 
+  # Printer settings GUI (Plasma brings its own in System Settings).
+  programs.system-config-printer.enable = true;
+
   services.gnome.gnome-keyring.enable = true; # Secret Service (Brave, Bitwarden, ...)
   # greetd includes login, which would otherwise start gnome-keyring before the
   # LUKS key is injected. Handle it in greetd's own session stack instead.

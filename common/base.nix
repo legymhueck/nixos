@@ -202,7 +202,26 @@ in
       enable = true;
       setSocketVariable = true;
     };
-    services.printing.enable = true;
+    services.printing = {
+      enable = true;
+      drivers = [ pkgs.foomatic-db-ppds ]; # Kyocera's own PostScript PPDs
+    };
+    # Kyocera FS-3820N (mono laser, fixed IP). It neither announces itself via
+    # mDNS nor speaks driverless IPP, so the queue is created here.
+    # See docs/setup/printer.md.
+    hardware.printers = {
+      ensurePrinters = [
+        {
+          name = "Kyocera_FS-3820N";
+          description = "Kyocera FS-3820N";
+          location = "LAN";
+          deviceUri = "socket://192.168.2.52:9100";
+          model = "foomatic-db-ppds/Kyocera-FS-3820N-Postscript-Kyocera.ppd.gz";
+          ppdOptions.PageSize = "A4";
+        }
+      ];
+      ensureDefaultPrinter = "Kyocera_FS-3820N";
+    };
     services.fwupd.enable = true;
     services.hardware.bolt.enable = true;
     services.udisks2.enable = true;
