@@ -11,7 +11,6 @@
   config = lib.mkIf (osConfig.nixbox.stage == "full") {
     home.packages = with pkgs; [
       bitwarden-desktop
-      doublecmd-qt6
       intellij-idea
       pcloud
       proton-pass

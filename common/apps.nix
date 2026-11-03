@@ -23,6 +23,9 @@
       conjure
       duckdb
       dvdbackup
+      # nixpkgs' cached Qt5 build is themed through Noctalia via qt5ct;
+      # configuration is in ../dotfiles/doublecmd.
+      doublecmd
       filen-desktop
       filius
       gimp

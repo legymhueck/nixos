@@ -1,8 +1,8 @@
 { pkgs, ... }:
 
 {
-  # System-wide tools shared by both desktop variants. Linters and formatters
-  # for this repository are in the dev shell (`nix develop`).
+  # System-wide tools shared by both desktop variants. Repository linters are
+  # in the dev shell (`nix develop`).
   environment.systemPackages = with pkgs; [
     acpi
     alsa-utils
@@ -25,6 +25,7 @@
     man-pages
     mc
     nfs-utils
+    nixfmt
     ntfs3g
     openssh
     rclone
