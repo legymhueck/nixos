@@ -24,12 +24,14 @@
       [Appearance]
       color_scheme_path=${config.home.homeDirectory}/.config/qt5ct/colors/noctalia.conf
       custom_palette=true
+      icon_theme=breeze-dark
       style=Fusion
     '';
     "qt6ct/qt6ct.conf".text = ''
       [Appearance]
       color_scheme_path=${config.home.homeDirectory}/.config/qt6ct/colors/noctalia.conf
       custom_palette=true
+      icon_theme=breeze-dark
       style=Fusion
     '';
   };
