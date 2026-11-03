@@ -1,4 +1,5 @@
 {
+  config,
   lib,
   pkgs,
   osConfig,
@@ -9,6 +10,14 @@
   # Large nixpkgs applications, active from the apps stage on. Local packages
   # and customized builds are in ./built.nix.
   config = lib.mkIf (osConfig.nixbox.stage != "base") {
+    # Double Commander reads the extension -> icon name mapping only from
+    # /usr/share/mime and ~/.local/share/mime (hardcoded in
+    # src/platform/upixmapmanager.pas), so without these files it shows no
+    # file type icons. Link them from Home Manager's MIME database.
+    xdg.dataFile = lib.genAttrs [ "mime/globs" "mime/icons" "mime/generic-icons" ] (f: {
+      source = "${config.home.path}/share/${f}";
+    });
+
     home.packages = with pkgs; [
       aria2
       aspell
@@ -24,7 +33,7 @@
       duckdb
       dvdbackup
       # nixpkgs' cached Qt5 build is themed through Noctalia via qt5ct;
-      # configuration is in ../dotfiles/doublecmd.
+      # configuration is in ../dotfiles/doublecmd, MIME data below.
       doublecmd
       filen-desktop
       filius
