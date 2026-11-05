@@ -98,7 +98,28 @@ in
     nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) allowedUnfreePkgs;
     # Local packages from ../pkgs (pkgs.hylki, ...). Also visible to Home
     # Manager because of home-manager.useGlobalPkgs.
-    nixpkgs.overlays = [ (import ../pkgs { inherit inputs; }) ];
+    nixpkgs.overlays = [
+      (import ../pkgs { inherit inputs; })
+      # Temporary: opencode 2.2.5 in nixos-unstable (~1d06008) ships a stale
+      # node_modules outputHash (computed with bun 1.4.2; bun 1.4.4 changed what
+      # `bun install --os="*"` produces, so the fixed-output derivation never
+      # matches on Linux and there is no cached build). The fix is in nixpkgs
+      # master (NixOS/nixpkgs#582675) but has not reached nixos-unstable yet;
+      # drop this once it does. Guarded on version, so it goes inert then.
+      (final: prev: {
+        opencode =
+          if prev.lib.getVersion prev.opencode != "2.2.5" then
+            prev.opencode
+          else
+            prev.opencode.overrideAttrs (old: {
+              node_modules = old.node_modules.overrideAttrs (_: {
+                # The hash the derivation actually produces on Linux
+                # (confirmed by three independent rebuilds, NixOS/nixpkgs#582673).
+                outputHash = "sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=";
+              });
+            });
+      })
+    ];
     # nh: nicer rebuilds (`nh os switch`) and the weekly garbage collection
     # (replaces nix.gc, they must not both be enabled).
     programs.nh = {

@@ -74,6 +74,8 @@
       logisim-evolution
       meld
       mistral-rs
+      networkmanager
+      networkmanagerapplet
       nuspell
       openconnect
       pandoc
