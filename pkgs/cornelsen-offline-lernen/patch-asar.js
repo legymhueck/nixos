@@ -23,26 +23,14 @@ const DOL = '$' + '{';
 const patches = [
     {
         name: 'annotations-404-fallback',
-        from: 'getProductAnnotations(r,s=!1){return this.http.get(`' + DOL + 's?os.getSyncApiBaseUrl():os.getApiBaseUrl()}/pspdf/annotations/' + DOL + 'r}`).pipe(ip(y=>r0(()=>y)),Jl(y=>this.mapOfflinePdfIds(y)))}',
-        fromAlt: 'getProductAnnotations(r,s=!1){return this.http.get(`' + DOL + 's?ls.getSyncApiBaseUrl():ls.getApiBaseUrl()}/pspdf/annotations/' + DOL + 'r}`).pipe(nc(y=>this.mapOfflinePdfIds(y)))}',
-        toAlt: 'getProductAnnotations(r,s=!1){return this.http.get(`' + DOL + 's?ls.getSyncApiBaseUrl():ls.getApiBaseUrl()}/pspdf/annotations/' + DOL + 'r}`).pipe(op(y=>s&&y.status===404?fs({}):r0(()=>y)),nc(y=>this.mapOfflinePdfIds(y)))}',
-        fromAlt2: 'getProductAnnotations(r,s=!1){return this.http.get(`' + DOL + 's?cs.getSyncApiBaseUrl():cs.getApiBaseUrl()}/pspdf/annotations/' + DOL + 'r}`).pipe(nc(y=>this.mapOfflinePdfIds(y)))}',
-        toAlt2: 'getProductAnnotations(r,s=!1){return this.http.get(`' + DOL + 's?cs.getSyncApiBaseUrl():cs.getApiBaseUrl()}/pspdf/annotations/' + DOL + 'r}`).pipe(op(y=>s&&y.status===404?Es({}):r0(()=>y)),nc(y=>this.mapOfflinePdfIds(y)))}',
-        fromAlt3: 'getProductAnnotations(i,s=!1){return this.http.get(`' + DOL + 's?cs.getSyncApiBaseUrl():cs.getApiBaseUrl()}/pspdf/annotations/' + DOL + 'i}`).pipe(nc(y=>this.mapOfflinePdfIds(y)))}',
-        toAlt3: 'getProductAnnotations(i,s=!1){return this.http.get(`' + DOL + 's?cs.getSyncApiBaseUrl():cs.getApiBaseUrl()}/pspdf/annotations/' + DOL + 'i}`).pipe(ip(y=>{if(s&&y.status===404)return _s({});throw y}),nc(y=>this.mapOfflinePdfIds(y)))}',
-        to: 'getProductAnnotations(r,s=!1){return this.http.get(`' + DOL + 's?os.getSyncApiBaseUrl():os.getApiBaseUrl()}/pspdf/annotations/' + DOL + 'r}`).pipe(ip(y=>s&&y.status===404?hs({}):r0(()=>y)),Jl(y=>this.mapOfflinePdfIds(y)))}',
+        from: 'getProductAnnotations(t){return this.http.get(`' + DOL + 'Na.getApiBaseUrl()}/pspdf/all-annotations/' + DOL + 't}`).pipe(Qr(i=>(i||[]).reduce((c,q)=>{var ce=q,{documentId:v}=ce;return c[v]=ft(ce,[`documentId`]),c},{})),fl(i=>this.mapOfflinePdfIds(i)))}',
+        to: 'getProductAnnotations(t){return this.http.get(`' + DOL + 'Na.getApiBaseUrl()}/pspdf/all-annotations/' + DOL + 't}`).pipe(Jd(i=>{if(i.status===404)return Qa([]);throw i}),Qr(i=>(i||[]).reduce((c,q)=>{var ce=q,{documentId:v}=ce;return c[v]=ft(ce,[`documentId`]),c},{})),fl(i=>this.mapOfflinePdfIds(i)))}',
         required: false
     },
     {
         name: 'compatibility-401-fallback',
-        from: 'isCompatibleWithOnline$(){return this.http.get(`' + DOL + 'os.getSyncApiBaseUrl()}/compatibility/offlineClients/' + DOL + 'GE}`).pipe(sa(r=>r.isCompatible))}',
-        fromAlt: 'isCompatibleWithOnline$(){return this.http.get(`' + DOL + 'ls.getSyncApiBaseUrl()}/compatibility/offlineClients/' + DOL + 'qE}`).pipe(sa(r=>r.isCompatible))}',
-        toAlt: 'isCompatibleWithOnline$(){return this.http.get(`' + DOL + 'ls.getSyncApiBaseUrl()}/compatibility/offlineClients/' + DOL + 'qE}`).pipe(sa(r=>r.isCompatible),op(r=>r.status===401?fs(!0):r0(()=>r)))}',
-        fromAlt2: 'isCompatibleWithOnline$(){return this.http.get(`' + DOL + 'cs.getSyncApiBaseUrl()}/compatibility/offlineClients/' + DOL + 'ZE}`).pipe(sa(r=>r.isCompatible))}',
-        toAlt2: 'isCompatibleWithOnline$(){return this.http.get(`' + DOL + 'cs.getSyncApiBaseUrl()}/compatibility/offlineClients/' + DOL + 'ZE}`).pipe(sa(r=>r.isCompatible),op(r=>r.status===401?Es(!0):r0(()=>r)))}',
-        fromAlt3: 'isCompatibleWithOnline$(){return this.http.get(`' + DOL + 'cs.getSyncApiBaseUrl()}/compatibility/offlineClients/' + DOL + 'QE}`).pipe(ta(i=>i.isCompatible))}',
-        toAlt3: 'isCompatibleWithOnline$(){return this.http.get(`' + DOL + 'cs.getSyncApiBaseUrl()}/compatibility/offlineClients/' + DOL + 'QE}`).pipe(ta(i=>i.isCompatible),ip(r=>{if(r.status===401)return _s(!0);throw r}))}',
-        to: 'isCompatibleWithOnline$(){return this.http.get(`' + DOL + 'os.getSyncApiBaseUrl()}/compatibility/offlineClients/' + DOL + 'GE}`).pipe(sa(r=>r.isCompatible),ip(r=>r.status===401?hs(!0):r0(()=>r)))}',
+        from: 'isCompatibleWithOnline$(){return this.http.get(`' + DOL + 'Na.getSyncApiBaseUrl()}/compatibility/offlineClients/' + DOL + 'dC}`).pipe(Qr((t=>t.isCompatible)))}',
+        to: 'isCompatibleWithOnline$(){return this.http.get(`' + DOL + 'Na.getSyncApiBaseUrl()}/compatibility/offlineClients/' + DOL + 'dC}`).pipe(Qr((t=>t.isCompatible)),Jd(t=>{if(t.status===401)return Qa(!0);throw t}))}',
         required: false
     }
 ];

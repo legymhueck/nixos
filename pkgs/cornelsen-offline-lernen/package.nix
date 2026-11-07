@@ -79,11 +79,11 @@ let
 in
 stdenv.mkDerivation {
   pname = "cornelsen-offline-lernen-bin";
-  version = "37.10.2";
+  version = "44.0.0";
 
   src = fetchurl {
     url = "https://ebook.cornelsen.de/uma20/public/v2/uma/offline/win";
-    hash = "sha512-LLKyespGRbJYLy0yX9atF/cBNHFsIC/+75/7ZxV07m5EB4+hXwh4xobR5zfyTE2Dw237zjgLQEpiPA9slKFnrg==";
+    hash = "sha512-+b2++Zs2yFx0WNqVpox7oqtRXq3cNHY2uXk4mzFuc3B4WthV6ifSpK9jez/OR/wLmLku8nPwGxgMVyQH4nvIUA==";
   };
 
   nativeBuildInputs = [
