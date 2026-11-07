@@ -221,6 +221,9 @@ use the repository's root flake (`flake.nix`); there are no per-configuration fl
 #file("common/base.nix")
 #raw(read("../../common/base.nix"), lang: "nix", block: true)
 
+#file("common/backup.nix")
+#raw(read("../../common/backup.nix"), lang: "nix", block: true)
+
 #file("common/vars.nix")
 #raw(read("../../common/vars.nix"), lang: "nix", block: true)
 

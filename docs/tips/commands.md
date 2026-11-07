@@ -31,6 +31,51 @@ to-webp *.jpg              # all images in the folder
 to-webp -q 95 photo.jpg    # for things you want to keep extra sharp
 ```
 
+## Backup of the teaching archive: `restic-unterricht`
+
+Encrypted, versioned backup of `~/Documents/GitHub/micleh/unterricht`
+(including the git-ignored archive) with restic (`common/backup.nix`). The
+target is a USB disk (ext4, label `restic-backup`) that lives outside the
+house; restic encrypts everything itself, so no LUKS is needed. One-time setup:
+
+```sh
+lsblk -o NAME,SIZE,FSTYPE,LABEL,MODEL       # find the disk, e.g. /dev/sdc -- check twice
+sudo wipefs -a /dev/sdc                     # erases the disk!
+sudo parted -s /dev/sdc mklabel gpt mkpart restic 1MiB 100%
+sudo mkfs.ext4 -L restic-backup /dev/sdc1
+udisksctl mount -b /dev/sdc1                # -> /run/media/m/restic-backup
+sudo install -d -o m -g users /run/media/m/restic-backup/restic
+mkdir -p ~/.config/restic && chmod 700 ~/.config/restic
+echo /run/media/m/restic-backup/restic/unterricht > ~/.config/restic/unterricht-repo
+(umask 077; read -rs -p 'Passwort: ' pw; echo "$pw" > ~/.config/restic/unterricht-passwort)
+restic-unterricht init                      # create the repository (once)
+sudo systemctl start restic-backups-unterricht   # first backup (takes a while)
+```
+
+Keep the password in KeePassXC too: without it the backup cannot be read.
+The daily timer only runs while the disk is attached; otherwise start it by
+hand after plugging in. Unplug with `udisksctl unmount -b /dev/sdc1`.
+
+```sh
+restic-unterricht snapshots     # list backups
+restic-unterricht ls latest | rg relative-clauses
+restic-unterricht restore latest --target /tmp/wiederherstellen --include '*/englisch/grammatik'
+restic-unterricht check         # verify the repository
+systemctl list-timers restic-backups-unterricht
+journalctl -u restic-backups-unterricht -e   # last run
+```
+
+## Full-text search: `recoll`
+
+Indexes Word, LibreOffice, PDF, Markdown and text files in the teaching
+repository (`services.recoll` in `common/apps.nix`), daily by a user timer.
+
+```sh
+systemctl --user start recollindex   # build the index now (first run: long)
+recoll                               # search GUI: words, "phrases", ext:docx, dir:englisch
+recollq 'Ayers Rock'                 # search in the terminal
+```
+
 ## System
 
 ```sh

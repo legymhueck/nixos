@@ -8,3 +8,5 @@
 - [BiBox](https://www.bibox.schule) - Westermann school books client
 - [MTPlayer](https://www.p2tools.de/mtplayer/) - Media player for German/Austrian/Swiss public broadcasters
 - [RevPDF](https://www.revpdf.com) - Offline PDF editor
+- [restic](https://restic.net) - Encrypted, versioned backups (`restic-unterricht`)
+- [Recoll](https://www.recoll.org) - Full-text search in documents

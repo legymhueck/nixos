@@ -54,6 +54,7 @@ let
 in
 {
   imports = [
+    ./backup.nix
     ./options.nix
     ./packages.nix
   ];

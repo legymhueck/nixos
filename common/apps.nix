@@ -18,6 +18,35 @@
       source = "${config.home.path}/share/${f}";
     });
 
+    # Full-text search (Office, ODF, PDF, Markdown ...) over the teaching
+    # repository incl. its git-ignored archive. The index is updated daily by
+    # a systemd user timer; search with the `recoll` GUI or `recollq WORD`.
+    services.recoll = {
+      enable = true;
+      startAt = "daily";
+      settings = {
+        topdirs = [ "${config.home.homeDirectory}/Documents/GitHub/micleh/unterricht" ];
+        "skippedNames+" = [
+          ".git"
+          ".spiegel-papierkorb"
+          ".venv"
+          "__pycache__"
+          "node_modules"
+          "out"
+          "*.class"
+        ];
+        # Media files: only the file name is indexed, not the content.
+        indexallfilenames = true;
+        # Old .doc files antiword cannot read are converted with LibreOffice.
+        # Give that headless instance its own profile: with the user's profile
+        # it collides with a running LibreOffice, which then offers Safe Mode.
+        sofficecmd = [
+          "${pkgs.libreoffice}/bin/soffice"
+          "-env:UserInstallation=file://${config.home.homeDirectory}/.cache/recoll-libreoffice"
+        ];
+      };
+    };
+
     home.packages = with pkgs; [
       aria2
       aspell

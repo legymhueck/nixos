@@ -16,6 +16,7 @@
     compsize
     ddcutil
     dosfstools
+    e2fsprogs
     exfatprogs
     ffmpeg
     git
@@ -28,6 +29,7 @@
     nixfmt
     ntfs3g
     openssh
+    parted
     rclone
     smartmontools
     tpm2-tools
