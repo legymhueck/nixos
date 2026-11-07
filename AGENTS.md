@@ -6,7 +6,7 @@ Two alternative NixOS desktops (Mango + Noctalia, KDE Plasma 6) for one laptop (
 
 - `nixosConfigurations.nixbox` = `nixbox-<file ./profile>`. A real `nixbox-<variant>` exists only if `nixos-<variant>/hardware-configuration.nix` exists (the flake adds it; the one committed under `nixos-mango/` belongs to this machine). The `-eval`, `-apps-eval`, `-base-eval` twins use a `/dev/null` stand-in: for checks only, never deploy.
 - Module arguments `inputs` and `vars` (`common/vars.nix`) come from `specialArgs`/`extraSpecialArgs`; never `import` vars.nix in modules.
-- Install stages: the file `./stage` (`base`/`apps`/`full`, committed as `full`) sets the option `nixbox.stage`. The system level is complete in every stage; only Home Manager packages are split. `home-packages.nix` = small, cached, needed for a usable desktop (never move Firefox, Brave, Nautilus, qt6ct, kitty/foot out of it). `apps.nix` = large cached nixpkgs apps (`stage != "base"`). `built.nix` = everything compiled locally or unfree: `pkgs/`, wrappers, unfree apps (`stage == "full"`). Stage modules are always imported and wrap their `config` in `lib.mkIf`.
+- Install stages: the file `./stage` (`base`/`apps`/`full`, committed as `full`) sets the option `nixbox.stage`. The system level is complete in every stage; only Home Manager packages are split. `home-packages.nix` = small, cached, needed for a usable desktop (never move Firefox, Chromium, Nautilus, qt6ct, kitty/foot out of it). `apps.nix` = large cached nixpkgs apps (`stage != "base"`). `built.nix` = everything compiled locally or unfree: `pkgs/`, wrappers, unfree apps (`stage == "full"`). Stage modules are always imported and wrap their `config` in `lib.mkIf`.
 - One `pkgs` everywhere (`useGlobalPkgs`); overlays live in `common/base.nix`. No package is pinned to another nixpkgs revision; add a pin only if unstable is broken and uncached, and remove it once it is cached.
 
 ## Invariants
@@ -17,7 +17,7 @@ Two alternative NixOS desktops (Mango + Noctalia, KDE Plasma 6) for one laptop (
 - Mango login: LUKS passphrase = user password. greetd autologin (`initial_session`) at boot only, tuigreet afterwards; `pam_fde_boot_pw` unlocks gnome-keyring. Never set an empty password; root stays locked.
 - zram only, no swap file. `programs.nh` cleans; never also enable `nix.gc`.
 - Cursor: set once as `nixbox.cursor` in `nixos-mango/configuration.nix`; `desktop.nix` reads it via `osConfig` for dconf, Mango and `gtk.cursorTheme` (XWayland apps such as pCloud read the cursor only from GTK's settings.ini).
-- Brave policies go to `/etc/brave/policies/managed/brave.json`, not `programs.chromium`.
+- Chromium is configured declaratively: extensions preinstall from the Chrome Web Store via `programs.chromium.extensions` (`common/chromium.nix`), and its policies go to `/etc/chromium/policies/managed/chromium.json` (`common/base.nix`). The password store (`--password-store`) is set per variant in `nixos-<variant>/home.nix`.
 - `install.sh` copies the whole checkout and commits with `git add -A` (`.gitignore` covers `result*`).
 
 ## Workflows

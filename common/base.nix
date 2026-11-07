@@ -13,7 +13,6 @@ let
     "antigravity-ide"
     "bibox"
     "bitwarden-desktop"
-    "brave"
     "chatgpt"
     "claude-code"
     "github-copilot-cli"
@@ -39,36 +38,18 @@ let
     "zed-editor"
   ];
 
-  # Brave managed policies (Brave reads /etc/brave/policies/managed, NOT the
-  # /etc/chromium path that programs.chromium writes).
-  bravePolicies = {
+  # Chromium managed policies (Chromium reads /etc/chromium/policies/managed).
+  chromiumPolicies = {
     # blank page on launch and for every new tab
     NewTabPageLocation = "about:blank";
     HomepageLocation = "about:blank";
     HomepageIsNewTabPage = false;
     RestoreOnStartup = 5; # 5 = open the New Tab page (= about:blank)
 
-    # start-page content / built-in extras
-    BraveRewardsDisabled = true;
-    BraveWalletDisabled = true;
-    BraveVPNDisabled = true;
-    BraveTalkDisabled = true;
-    BraveNewsDisabled = true;
-    BraveAIChatEnabled = false;
-    BravePlaylistEnabled = false;
-    BraveSpeedreaderEnabled = false;
-    BraveWaybackMachineEnabled = false;
-
-    # telemetry / stats
-    BraveP3AEnabled = false;
-    BraveStatsPingEnabled = false;
-    BraveWebDiscoveryEnabled = false;
-    MetricsReportingEnabled = false;
-
-    # miscellaneous prompts
-    PromotionalTabsEnabled = false;
-    DefaultBrowserSettingEnabled = false;
+    # Google sign-in containers and account prompts
     BrowserSignin = 0;
+    SyncDisabled = true;
+    DefaultBrowserSettingEnabled = false;
   };
 in
 {
@@ -292,8 +273,8 @@ in
     ];
     hardware.graphics.enable = true;
 
-    # --- Brave: strip the start page, telemetry and extra features ---
-    # Policies land in /etc/brave/policies/managed (see brave://policy).
-    environment.etc."brave/policies/managed/brave.json".text = builtins.toJSON bravePolicies;
+    # --- Chromium: strip the sign-in and default-browser prompts; the blank
+    # new tab comes from these policies, the extensions from common/chromium.nix ---
+    environment.etc."chromium/policies/managed/chromium.json".text = builtins.toJSON chromiumPolicies;
   };
 }

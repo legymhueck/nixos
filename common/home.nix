@@ -7,6 +7,7 @@
 {
   imports = [
     ./firefox.nix
+    ./chromium.nix
     ./home-packages.nix
     ./scripts.nix
     # Active only from their install stage on (osConfig.nixbox.stage).

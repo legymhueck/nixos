@@ -215,8 +215,8 @@ use the repository's root flake (`flake.nix`); there are no per-configuration fl
 #file("nixos-mango/built.nix")
 #raw(read("../../nixos-mango/built.nix"), lang: "nix", block: true)
 
-#file("common/brave.nix")
-#raw(read("../../common/brave.nix"), lang: "nix", block: true)
+#file("common/chromium.nix")
+#raw(read("../../common/chromium.nix"), lang: "nix", block: true)
 
 #file("common/base.nix")
 #raw(read("../../common/base.nix"), lang: "nix", block: true)

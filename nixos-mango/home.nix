@@ -10,6 +10,10 @@
     ./built.nix
   ];
 
+  # Chromium (../common/chromium.nix) reads saved passwords from the running
+  # desktop's keyring (gnome-keyring on Mango).
+  programs.chromium.commandLineArgs = [ "--password-store=gnome-libsecret" ];
+
   # Double Commander from nixpkgs is the Qt5 build, so it needs qt5ct; the
   # Qt6 variant stays for future Qt6 apps. qt5ct's plugin also registers the
   # "qt6ct" key, so one QT_QPA_PLATFORMTHEME (set in ./configuration.nix)
