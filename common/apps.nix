@@ -38,12 +38,20 @@
         # Media files: only the file name is indexed, not the content.
         indexallfilenames = true;
         # Old .doc files antiword cannot read are converted with LibreOffice.
-        # Give that headless instance its own profile: with the user's profile
-        # it collides with a running LibreOffice, which then offers Safe Mode.
-        sofficecmd = [
-          "${pkgs.libreoffice}/bin/soffice"
-          "-env:UserInstallation=file://${config.home.homeDirectory}/.cache/recoll-libreoffice"
-        ];
+        # Recoll always passes --safe-mode, which makes LibreOffice show its
+        # Safe Mode dialog even with --headless. The wrapper drops that flag,
+        # forces the windowless VCL backend (svp) and uses its own profile, so
+        # neither a window appears nor the user's profile is touched.
+        sofficecmd = "${pkgs.writeShellScript "recoll-soffice" ''
+          args=()
+          for a in "$@"; do
+            [[ $a == --safe-mode ]] || args+=("$a")
+          done
+          export SAL_USE_VCLPLUGIN=svp
+          exec ${pkgs.libreoffice}/bin/soffice \
+            -env:UserInstallation=file://${config.home.homeDirectory}/.cache/recoll-libreoffice \
+            "''${args[@]}"
+        ''}";
       };
     };
 
