@@ -202,6 +202,19 @@ in
     };
   };
 
+  systemd.user.services.tailscale-systray = {
+    Unit = {
+      Description = "Tailscale system tray icon";
+      PartOf = [ "graphical-session.target" ];
+      After = [ "graphical-session-pre.target" ];
+    };
+    Service = {
+      ExecStart = "${pkgs.tailscale-systray}/bin/tailscale-systray";
+      Restart = "on-failure";
+    };
+    Install.WantedBy = [ "graphical-session.target" ];
+  };
+
   wayland.windowManager.mango = {
     enable = true;
 
