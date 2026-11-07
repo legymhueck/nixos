@@ -27,6 +27,7 @@ in
     ])
     (mkScript "ssh-permissions" [ findutils ])
     (mkScript "to-webm" [ ffmpeg ])
+    (mkScript "to-webp" [ imagemagick ])
     (mkScript "update-check" [
       curl
       git

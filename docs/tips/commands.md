@@ -20,6 +20,17 @@ to-webm -q 28 Recording.mp4    # sharper text, larger file
 - Use `--mp4` when students use iPads or older Macs.
 - Wider than 1920 px is scaled down to 1920 px.
 
+## Shrink images: `to-webp`
+
+Convert pictures into WebP next to the originals; typically saves 80-90% on
+wallpapers and photos (quality 85).
+
+```sh
+to-webp wallpaper.png      # → wallpaper.webp, the PNG stays
+to-webp *.jpg              # all images in the folder
+to-webp -q 95 photo.jpg    # for things you want to keep extra sharp
+```
+
 ## System
 
 ```sh

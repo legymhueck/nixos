@@ -14,3 +14,4 @@ commands and aliases).
 | `ssh-permissions` | Reset permissions in `~/.ssh` (700/600/644) |
 | `update-check` | Show which flake inputs have newer upstream commits (read-only) |
 | `to-webm` | Shrink recordings into browser-playable WebM (AV1) or, with `--mp4`, H.264 MP4 |
+| `to-webp` | Convert images (JPG, PNG, AVIF) into much smaller WebP |

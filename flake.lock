@@ -63,11 +63,11 @@
     "hylki-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1794045172,
-        "narHash": "sha256-8lrUTWs7wlodZNpo7fRVB00JP2ZjlnQue4UDPQDwhds=",
+        "lastModified": 1794046985,
+        "narHash": "sha256-cX4iMFFSy2Y1Tyq1zHha8HVPT7L1ZytbR0uve56jZko=",
         "owner": "hyprlab",
         "repo": "hylki",
-        "rev": "25181bfa92c9f6873d260b572c6bb3c020bfc770",
+        "rev": "77acfb2454c59de5f966f5f69926cf4cafb68d1a",
         "type": "github"
       },
       "original": {
